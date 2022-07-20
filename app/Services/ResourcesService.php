@@ -15,10 +15,15 @@ class ResourcesService
      * @param integer $paginate
      * @return \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
      */
-    public function get(int $paginate = 15): \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
+    public function get(Request $request = null, int $paginate = 15): \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
     {
-        $resources =  Resource::with('resourceType')
-            ->orderBy('created_at');
+        $resources = Resource::with('resourceType')
+            ->orderBy('created_at')
+            ->when(
+                $request->search ?? false,
+                fn ($query) => $query->where('title', 'LIKE', "%$request->search%")
+                    ->orWhere('description', 'LIKE', "%$request->search%")
+            );
 
         return $paginate ? $resources->paginate($paginate) : $resources->get();
     }

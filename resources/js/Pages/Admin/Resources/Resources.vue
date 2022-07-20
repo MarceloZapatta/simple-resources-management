@@ -9,10 +9,17 @@
             <div class="bg-white border-rounded m-6 p-4">
                 <div class="m-4">
                     <label for="search">Search</label>
-                    <input type="text" name="search" />
+                    <input
+                        data-testid="search"
+                        type="text"
+                        name="search"
+                        class="custom-input"
+                        v-model="search"
+                        placeholder="Search by title or description"
+                    />
 
                     <label for="filter">Filter Type</label>
-                    <select>
+                    <select class="custom-input">
                         <option>Select a option</option>
                         <option>PDF</option>
                     </select>
@@ -114,25 +121,29 @@ export default {
     },
     data() {
         return {
+            search: "",
             resources: [],
             meta: {},
             isLoading: false,
         };
     },
-    computed: {
-        console: () => console,
-    },
     methods: {
         fetchResources(page = 1) {
             this.isLoading = true;
             axios
-                .get(`/api/resources?page=${page}`)
+                .get(`/api/resources?page=${page}&search=${this.search}`)
                 .then((response) => {
                     this.resources = response.data.data;
                     console.error(this.resources);
                     this.meta = response.data.meta;
                 })
                 .finally(() => (this.isLoading = false));
+        },
+    },
+    watch: {
+        search(newSearch, oldSearch) {
+            const firstPage = 1;
+            this.fetchResources(firstPage);
         },
     },
     mounted() {

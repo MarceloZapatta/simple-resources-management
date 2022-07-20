@@ -63,4 +63,37 @@ class ResourcesServiceTest extends TestCase
         $this->assertCount(1, Resource::get());
         $this->assertInstanceOf(Resource::class, $result);
     }
+
+    /**
+     * Search resources
+     *
+     * @return void
+     */ 
+    public function test_search_resources()
+    {
+        Resource::factory()->create([
+            'title' => 'Lorem ipsum dors met'
+        ]);
+
+        /**
+         * @var \App\Services\ResourcesService
+         */
+        $resourcesService = App::make(ResourcesService::class);        
+
+        $request = new Request([
+            'search' => 'ipsum'
+        ]);
+
+        $resources = $resourcesService->get($request);
+
+        $this->assertCount(1, $resources);
+
+        $request = new Request([
+            'search' => 'blabla'
+        ]);
+
+        $resources = $resourcesService->get($request);
+
+        $this->assertEmpty($resources);
+    }
 }

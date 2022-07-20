@@ -1,4 +1,4 @@
-const { render, screen, waitFor } = require("@testing-library/vue");
+const { render, screen, waitFor, fireEvent } = require("@testing-library/vue");
 import { expect, vi } from "vitest";
 import Resources from "./Resources.vue";
 import "@testing-library/jest-dom";
@@ -57,10 +57,18 @@ it("render the component", () => {
 
 it("list resources", async () => {
     render(Resources);
-    expect(axios.get).toBeCalledWith("/api/resources");
+    expect(axios.get).toBeCalledWith("/api/resources?page=1&search=");
     expect(axios.get).toBeCalledTimes(1);
 
     await waitFor(() => expect(screen.getByText("Test 1")).toBeInTheDocument());
     expect(screen.getByText("Test 2")).toBeInTheDocument();
     expect(screen.getByText("Test 3")).toBeInTheDocument();
+});
+
+it("search resources", async () => {
+    render(Resources);
+
+    await fireEvent.update(screen.getByTestId("search"), "Test 2");
+
+    await waitFor(() => expect(axios.get).toBeCalledWith("/api/resources?page=1&search=Test 2"));
 });
