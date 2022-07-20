@@ -42,8 +42,16 @@
                             ></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr v-if="!isLoading && (!resources || resources.length <= 0)">
+                    <tbody v-if="isLoading">
+                        <ResourcesLoading />
+                    </tbody>
+                    <tbody v-else>
+                        <tr
+                            v-if="
+                                !isLoading &&
+                                (!resources || resources.length <= 0)
+                            "
+                        >
                             <td colspan="4">No resources found.</td>
                         </tr>
                         <tr
@@ -89,7 +97,7 @@
                     :items-per-page="meta.per_page"
                     :max-pages-shown="5"
                     :current-page="meta.current_page"
-                    :on-click="() => null"
+                    :on-click="fetchResources"
                 />
             </div>
         </main>
@@ -98,8 +106,12 @@
 
 <script>
 import axios from "axios";
+import ResourcesLoading from "../../../Components/ResourcesLoading.vue";
 
 export default {
+    components: {
+        ResourcesLoading,
+    },
     data() {
         return {
             resources: [],
@@ -107,11 +119,14 @@ export default {
             isLoading: false,
         };
     },
+    computed: {
+        console: () => console,
+    },
     methods: {
-        fetchResources() {
-            this.isLoading = false;
+        fetchResources(page = 1) {
+            this.isLoading = true;
             axios
-                .get("/api/resources")
+                .get(`/api/resources?page=${page}`)
                 .then((response) => {
                     this.resources = response.data.data;
                     console.error(this.resources);
@@ -121,7 +136,7 @@ export default {
         },
     },
     mounted() {
-        this.fetchResources();
+        this.fetchResources(1);
     },
 };
 </script>
