@@ -3,11 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ResourceResourceCollection;
+use App\Services\ResourcesService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ResourcesController extends Controller
 {
+    /**
+     * ResourcesService
+     *
+     * @var ResourcesService
+     */ 
+    private ResourcesService $resourcesService;
+
+    /**
+     * Resource Controller
+     *
+     * @param ResourcesService $resourcesService
+     */
+    public function __construct(ResourcesService $resourcesService)
+    {
+        $this->resourcesService = $resourcesService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +34,7 @@ class ResourcesController extends Controller
      */
     public function index()
     {
-        //
+        return new ResourceResourceCollection($this->resourcesService->get());
     }
 
     /**

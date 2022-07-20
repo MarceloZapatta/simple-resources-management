@@ -15,7 +15,32 @@ class ResourcesServiceTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * A basic unit test example.
+     * Test get resources
+     *
+     * @return void
+     */
+    public function test_get_resources()
+    {
+        Resource::factory(5)->create();
+
+        /**
+         * @var \App\Services\ResourcesService
+         */
+        $resourcesService = App::make(ResourcesService::class);
+
+        $resources = $resourcesService->get();
+        
+        $this->assertCount(5, $resources);
+        
+        Resource::factory(3)->create();
+
+        $resources = $resourcesService->get();
+
+        $this->assertCount(8, $resources);
+    }
+
+    /**
+     * Test store a resource
      *
      * @return void
      */
@@ -35,7 +60,7 @@ class ResourcesServiceTest extends TestCase
 
         $result = $resourcesService->store($request);
 
-        $this->assertCount(1, Resource::get())
-            ->assertInstanceOf(Resource::class, $result);
+        $this->assertCount(1, Resource::get());
+        $this->assertInstanceOf(Resource::class, $result);
     }
 }

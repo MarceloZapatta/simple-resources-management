@@ -3,19 +3,29 @@
 namespace App\Services;
 
 use App\Enums\ResourceTypeEnum;
-use App\Http\Requests\ResourceStoreRequest;
 use App\Models\Resource;
 use Illuminate\Http\File;
+use Illuminate\Http\Request;
 
 class ResourcesService
 {
+    /**
+     * Get the resource
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function get(): \Illuminate\Support\Collection
+    {
+        return Resource::orderBy('created_at')->get();
+    }
+
     /**
      * Store a new Resource
      *
      * @param ResourceStoreRequest $request
      * @return \App\Models\Resource
      */
-    public function store(ResourceStoreRequest $request): \App\Models\Resource
+    public function store(Request $request): \App\Models\Resource
     {
         if ($request->resource_type_id === ResourceTypeEnum::PDF) {
             $request->merge([
