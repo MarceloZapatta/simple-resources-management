@@ -2,10 +2,11 @@
     @apply w-full justify-center;
 }
 
-.paginate-buttons {
+.pagination-container .paginate-buttons {
     @apply p-2 m-2 text-gray-500 border rounded-full border-solid border-gray-100 transition w-10 text-sm;
 }
 
-.paginate-buttons:hover {
+.pagination-container .paginate-buttons:hover,
+.pagination-container .active-page {
     @apply bg-gray-100;
 }

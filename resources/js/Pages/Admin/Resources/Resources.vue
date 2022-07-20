@@ -9,21 +9,17 @@
             <div class="bg-white border-rounded m-6 p-4">
                 <div class="m-4">
                     <label for="search">Search</label>
-                    <input type="text" name="search" >
+                    <input type="text" name="search" />
 
                     <label for="filter">Filter Type</label>
                     <select>
-                        <option>
-                            Select a option
-                        </option>
-                        <option>
-                            PDF
-                        </option>
+                        <option>Select a option</option>
+                        <option>PDF</option>
                     </select>
 
                     <button>Add</button>
                 </div>
-                <table min-w-full divide-y divide-gray-300>
+                <table class="divide-y divide-gray-300 w-full">
                     <thead class="bg-gray-50">
                         <tr>
                             <th
@@ -47,21 +43,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr v-if="!isLoading && (!resources || resources.length <= 0)">
+                            <td colspan="4">No resources found.</td>
+                        </tr>
+                        <tr
+                            v-for="resource in resources"
+                            v-bind:key="resource.id"
+                        >
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
-                                Resource 1
+                                {{ resource.title }}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
-                                Resource 2
+                                {{
+                                    resource.description.length > 40
+                                        ? resource.description.substring(
+                                              0,
+                                              40
+                                          ) + "..."
+                                        : resource.description
+                                }}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
-                                PDF
+                                {{ resource.resource_type.type }}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -75,10 +84,11 @@
                 </table>
 
                 <vue-awesome-paginate
-                    :total-items="50"
-                    :items-per-page="5"
+                    v-if="meta && meta.last_page > 1"
+                    :total-items="meta.total"
+                    :items-per-page="meta.per_page"
                     :max-pages-shown="5"
-                    :current-page="1"
+                    :current-page="meta.current_page"
                     :on-click="() => null"
                 />
             </div>
@@ -87,9 +97,31 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
+    data() {
+        return {
+            resources: [],
+            meta: {},
+            isLoading: false,
+        };
+    },
+    methods: {
+        fetchResources() {
+            this.isLoading = false;
+            axios
+                .get("/api/resources")
+                .then((response) => {
+                    this.resources = response.data.data;
+                    console.error(this.resources);
+                    this.meta = response.data.meta;
+                })
+                .finally(() => (this.isLoading = false));
+        },
+    },
     mounted() {
-        console.log("Component mounted.");
+        this.fetchResources();
     },
 };
 </script>

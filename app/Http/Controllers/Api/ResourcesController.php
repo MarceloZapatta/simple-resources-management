@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ResourceResourceCollection;
 use App\Services\ResourcesService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class ResourcesController extends Controller
 {

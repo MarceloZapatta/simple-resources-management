@@ -12,11 +12,15 @@ class ResourcesService
     /**
      * Get the resource
      *
-     * @return \Illuminate\Support\Collection
+     * @param integer $paginate
+     * @return \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
      */
-    public function get(): \Illuminate\Support\Collection
+    public function get(int $paginate = 15): \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
     {
-        return Resource::orderBy('created_at')->get();
+        $resources =  Resource::with('resourceType')
+            ->orderBy('created_at');
+
+        return $paginate ? $resources->paginate($paginate) : $resources->get();
     }
 
     /**

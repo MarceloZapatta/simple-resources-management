@@ -14,6 +14,14 @@ class ResourceResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'link' => $this->link,
+            'html_snippet' => $this->html_snippet,
+            'open_new_tab' => $this->open_new_tab,
+            'resource_type' => $this->resourceType
+        ];
     }
 }

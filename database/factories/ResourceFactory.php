@@ -18,7 +18,7 @@ class ResourceFactory extends Factory
     public function definition()
     {
         return [
-            'title' => $this->faker->title(),
+            'title' => ucfirst($this->faker->word()),
             'description' => $this->faker->text(),
             'html_snippet' => $this->faker->randomHtml(),
             'link' => $this->faker->url(),

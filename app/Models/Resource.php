@@ -17,4 +17,9 @@ class Resource extends Model
         'open_new_tab',
         'resource_type_id'
     ];
+
+    public function resourceType()
+    {
+        return $this->belongsTo(ResourceType::class);
+    }
 }
