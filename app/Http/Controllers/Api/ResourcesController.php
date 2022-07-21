@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ResourceRequest;
 use App\Http\Resources\ResourceResource;
 use App\Http\Resources\ResourceResourceCollection;
 use App\Models\Resource;
@@ -54,9 +55,13 @@ class ResourcesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ResourceRequest $request)
     {
-        //
+        $this->resourcesService->store($request);
+
+        return response()->json([
+            'message' => 'Success!'
+        ], 201);
     }
 
     /**
@@ -90,7 +95,11 @@ class ResourcesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->resourcesService->store($request);
+
+        return response()->json([
+            'message' => 'Success!'
+        ], 200);
     }
 
     /**
