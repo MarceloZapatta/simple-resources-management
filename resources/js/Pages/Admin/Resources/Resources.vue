@@ -137,7 +137,8 @@
                 />
                 <ResourcesEditModal
                     :isOpen="resourceEditing"
-                    :resource="resourceEdit"
+                    :resourceId="resourceEdit.id"
+                    :resourceTypes="resourceTypes"
                     @onClose="handleCloseModal"
                 />
             </div>
@@ -164,7 +165,7 @@ export default {
             meta: {},
             isLoading: false,
             resourceEditing: false,
-            resourceEdit: false,
+            resourceEdit: {},
         };
     },
     methods: {
@@ -202,6 +203,7 @@ export default {
             this.$swal("An error ocurred!", "Please try again later.");
         },
         handleCloseModal() {
+            this.resourceEdit = {};
             this.openEditResourceModal(false);
         },
         editResource(resource) {

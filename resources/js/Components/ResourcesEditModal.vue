@@ -26,9 +26,33 @@
                                     class="text-lg leading-6 font-medium text-gray-900"
                                     id="modal-title"
                                 >
-                                    Add Resource
+                                    {{ this.resourceId ? "Edit" : "Add" }}
+                                    Resource
                                 </h3>
                                 <div class="mt-2">
+                                    <div>
+                                        <label for="title">Type</label>
+                                        <select
+                                            name="resource_type_id"
+                                            v-model="resource.resource_type.id"
+                                            class="custom-input"
+                                        >
+                                            <option
+                                                placeholder
+                                                disabled
+                                                selected
+                                            >
+                                                Select a option
+                                            </option>
+                                            <option
+                                                v-for="resourceType in resourceTypes"
+                                                v-bind:value="resourceType.id"
+                                                v-bind:key="resourceType.id"
+                                            >
+                                                {{ resourceType.type }}
+                                            </option>
+                                        </select>
+                                    </div>
                                     <div>
                                         <label for="title">Title</label>
                                         <input
@@ -36,33 +60,63 @@
                                             type="text"
                                             class="custom-input"
                                             ref="title"
-                                            v-model="editingResource.title"
+                                            v-model="resource.title"
                                         />
                                     </div>
-                                    <div>
+                                    <div
+                                        v-if="isHTMLSnippet"
+                                    >
                                         <label for="description"
-                                            >Description</label
+                                            >Snippet description</label
                                         >
                                         <textarea
-                                            name="decription"
+                                            name="description"
                                             id="description"
                                             rows="5"
-                                            v-model="
-                                                editingResource.description
-                                            "
+                                            v-model="resource.description"
                                             class="custom-input"
                                         ></textarea>
                                     </div>
-                                    <div>
+                                    <div
+                                        v-if="isHTMLSnippet"
+                                    >
+                                        <label for="html_snippet"
+                                            >HTML Snippet</label
+                                        >
+                                        <textarea
+                                            name="html_snippet"
+                                            id="html_snippet"
+                                            rows="5"
+                                            v-model="resource.html_snippet"
+                                            class="custom-input"
+                                        ></textarea>
+                                    </div>
+                                    <div
+                                        v-if="isLink"
+                                    >
                                         <label for="link">Link</label>
                                         <input
                                             name="link"
                                             type="text"
                                             class="custom-input"
-                                            v-model="editingResource.link"
+                                            v-model="resource.link"
                                         />
                                     </div>
-                                    <div>
+                                    <div
+                                        v-if="isLink"
+                                    >
+                                        <label for="open_new_tab">
+                                            <input
+                                                name="open_new_tab"
+                                                type="checkbox"
+                                                v-model="resource.open_new_tab"
+                                            />
+                                            Open in a new tab
+                                        </label>
+                                    </div>
+                                    <div
+                                        v-if="isPdf"
+                                    >
                                         <label for="file">File upload</label>
                                         <input
                                             type="file"
@@ -87,12 +141,12 @@
                             type="button"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                         >
-                            Add {{ editingResource }}
+                            {{ this.resourceId ? "Edit" : "Add" }}
                         </button>
                         <button
                             type="button"
                             class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                            @click="$emit('onClose')"
+                            @click="handleClose"
                         >
                             Cancel
                         </button>
@@ -104,12 +158,69 @@
 </template>
 
 <script>
+import axios from "axios";
+
+const ResourceTypes = {
+    PDF: 1,
+    HTMLSnippet: 2,
+    Link: 3,
+};
+
 export default {
-    props: ["isOpen", "resourceId"],
+    props: ["isOpen", "resourceId", "resourceTypes"],
     data() {
         return {
-            resource: {}
+            isLoading: false,
+            resource: {
+                resource_type: {},
+            },
         };
-    }
+    },
+    methods: {
+        fetchResource() {
+            this.isLoading = true;
+
+            axios
+                .get(`/api/resources/${this.resourceId}`)
+                .then((response) => (this.resource = response.data.data))
+                .finally(() => (this.isLoading = false));
+        },
+        async handleClose() {
+            this.resource = {
+                resource_type: {},
+            };
+            this.$emit("onClose");
+        },
+    },
+    mounted() {
+        if (this.resourceId) {
+            this.fetchResource();
+        }
+    },
+    computed: {
+        isHTMLSnippet() {
+            return (
+                this.resource &&
+                this.resource.resource_type.id === ResourceTypes.HTMLSnippet
+            );
+        },
+        isPDF() {
+            return (
+                this.resource &&
+                this.resource.resource_type.id === ResourceTypes.PDF
+            );
+        },
+        isLink() {
+            return (
+                this.resource &&
+                this.resource.resource_type.id === ResourceTypes.Link
+            );
+        },
+    },
+    updated() {
+        if (this.resourceId && this.resourceId !== this.resource.id) {
+            this.fetchResource();
+        }
+    },
 };
 </script>
