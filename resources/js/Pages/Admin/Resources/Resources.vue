@@ -21,7 +21,12 @@
                     <label for="filter">Filter Type</label>
                     <select class="custom-input">
                         <option>Select a option</option>
-                        <option>PDF</option>
+                        <option
+                            v-for="resourceType in resourceTypes"
+                            v-bind:key="resourceType.id"
+                        >
+                            {{ resourceType.type }}
+                        </option>
                     </select>
 
                     <button>Add</button>
@@ -59,7 +64,12 @@
                                 (!resources || resources.length <= 0)
                             "
                         >
-                            <td colspan="4">No resources found.</td>
+                            <td
+                                colspan="4"
+                                className="text-gray-500 text-center px-3 py-4 text-sm"
+                            >
+                                No resources found.
+                            </td>
                         </tr>
                         <tr
                             v-for="resource in resources"
@@ -123,6 +133,7 @@ export default {
         return {
             search: "",
             resources: [],
+            resourceTypes: [],
             meta: {},
             isLoading: false,
         };
@@ -137,7 +148,11 @@ export default {
                     console.error(this.resources);
                     this.meta = response.data.meta;
                 })
+                .catch(this.showError)
                 .finally(() => (this.isLoading = false));
+        },
+        showError() {
+            this.$swal("An error ocurred!", "Please try again later.");
         },
     },
     watch: {

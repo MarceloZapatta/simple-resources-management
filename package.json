@@ -24,6 +24,7 @@
         "@testing-library/vue": "^6.6.1",
         "@vitejs/plugin-vue": "^3.0.1",
         "vue": "^3.2.37",
-        "vue-awesome-paginate": "^1.0.0"
+        "vue-awesome-paginate": "^1.0.0",
+        "vue-sweetalert2": "^5.0.5"
     }
 }

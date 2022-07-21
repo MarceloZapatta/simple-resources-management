@@ -96,4 +96,27 @@ class ResourcesServiceTest extends TestCase
 
         $this->assertEmpty($resources);
     }
+
+    public function test_filter_by_type()
+    {
+        Resource::factory()->create([
+            'resource_type_id' => ResourceTypeEnum::HTMLSnippet
+        ]);
+
+        Resource::factory()->create([
+            'resource_type_id' => ResourceTypeEnum::Link
+        ]);
+
+        $request = new Request([
+            'resource_type_id' => [ResourceTypeEnum::HTMLSnippet]
+        ]);
+
+        /**
+         * @var \App\Services\ResourcesService
+         */
+        $resourcesService = App::make(ResourcesService::class);  
+        $resources = $resourcesService->get($request);
+        $this->assertCount(1, $resources);
+        $this->assertTrue($resources->first()->resource_type_id === ResourceTypeEnum::HTMLSnippet->value);
+    }
 }

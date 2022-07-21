@@ -23,6 +23,10 @@ class ResourcesService
                 $request->search ?? false,
                 fn ($query) => $query->where('title', 'LIKE', "%$request->search%")
                     ->orWhere('description', 'LIKE', "%$request->search%")
+            )
+            ->when(
+                $request->resource_type_id ?? false,
+                fn ($query) => $query->whereIn('resource_type_id', $request->resource_type_id)
             );
 
         return $paginate ? $resources->paginate($paginate) : $resources->get();
