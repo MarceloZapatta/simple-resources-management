@@ -24,8 +24,9 @@
                         :options="resourceTypes"
                         label="type"
                         data-testid="filter"
-                        :reduce="resourceType => resourceType.id"
-                        multiple="true"></v-select>
+                        :reduce="(resourceType) => resourceType.id"
+                        :multiple="true"
+                    ></v-select>
                     <!-- <select
                         v-model="resourceTypeIds"
                         class="custom-input"
@@ -42,7 +43,7 @@
                         </option>
                     </select> -->
 
-                    <button>Add</button>
+                    <button @click="this.addResource">Add</button>
                 </div>
                 <table class="divide-y divide-gray-300 w-full">
                     <thead class="bg-gray-50">
@@ -87,6 +88,7 @@
                         <tr
                             v-for="resource in resources"
                             v-bind:key="resource.id"
+                            @click="editResource(resource)"
                         >
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -113,7 +115,11 @@
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
-                                <button>Edit</button>
+                                <button
+                                    @click="editResource(resource)"
+                                >
+                                    Edit
+                                </button>
                                 <button>Download</button>
                                 <button>Open</button>
                             </td>
@@ -129,7 +135,11 @@
                     :current-page="meta.current_page"
                     :on-click="fetchResources"
                 />
-                <ResourcesEditModal :isOpen="false" />
+                <ResourcesEditModal
+                    :isOpen="resourceEditing"
+                    :resource="resourceEdit"
+                    @onClose="handleCloseModal"
+                />
             </div>
         </main>
     </div>
@@ -154,6 +164,7 @@ export default {
             meta: {},
             isLoading: false,
             resourceEditing: false,
+            resourceEdit: false,
         };
     },
     methods: {
@@ -189,6 +200,19 @@ export default {
         },
         showError() {
             this.$swal("An error ocurred!", "Please try again later.");
+        },
+        handleCloseModal() {
+            this.openEditResourceModal(false);
+        },
+        editResource(resource) {
+            this.resourceEdit = resource;
+            this.openEditResourceModal();
+        },
+        addResource() {
+            this.openEditResourceModal();
+        },
+        openEditResourceModal(open = true) {
+            this.resourceEditing = open;
         },
     },
     watch: {

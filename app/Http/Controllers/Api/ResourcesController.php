@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ResourceResource;
 use App\Http\Resources\ResourceResourceCollection;
+use App\Models\Resource;
 use App\Services\ResourcesService;
 use Illuminate\Http\Request;
 
@@ -63,9 +65,9 @@ class ResourcesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Resource $resource)
     {
-        //
+        return new ResourceResource($resource);
     }
 
     /**
