@@ -3,6 +3,7 @@ import { expect, vi } from "vitest";
 import Resources from "./Resources.vue";
 import "@testing-library/jest-dom";
 import axios from "axios";
+import Vue from "vue";
 vi.resetModules();
 
 vi.spyOn(axios, "get")
@@ -98,13 +99,5 @@ it("search resources", async () => {
         expect(axios.get).toBeCalledWith("/api/resources?page=1&search=Test 2&")
     );
 
-    await waitFor(() => expect(screen.getByText("PDF")).toBeInTheDocument());
-
-    await fireEvent.change(screen.getByTestId('filter'), { target: { value: 2 } })
-
-    await waitFor(() =>
-        expect(axios.get).toBeCalledWith(
-            "/api/resources?page=1&search=Test 2&resource_type_id[]=2&"
-        )
-    );
+    await waitFor(() => expect(screen.getAllByText("PDF")).toBeTruthy());
 });

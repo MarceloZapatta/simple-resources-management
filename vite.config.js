@@ -24,9 +24,6 @@ export default defineConfig({
                     // reference assets in the public directly as expected.
                     includeAbsolute: false,
                 },
-                compilerOptions: {
-                    isCustomElement: (tag) => tag === "vue-awesome-paginate",
-                },
             },
         }),
     ],

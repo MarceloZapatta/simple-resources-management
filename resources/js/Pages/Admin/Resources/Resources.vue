@@ -19,7 +19,14 @@
                     />
 
                     <label for="filter">Filter Type</label>
-                    <select
+                    <v-select
+                        v-model="resourceTypeIds"
+                        :options="resourceTypes"
+                        label="type"
+                        data-testid="filter"
+                        :reduce="resourceType => resourceType.id"
+                        multiple="true"></v-select>
+                    <!-- <select
                         v-model="resourceTypeIds"
                         class="custom-input"
                         data-testid="filter"
@@ -33,7 +40,7 @@
                         >
                             {{ resourceType.type }}
                         </option>
-                    </select>
+                    </select> -->
 
                     <button>Add</button>
                 </div>
@@ -122,6 +129,7 @@
                     :current-page="meta.current_page"
                     :on-click="fetchResources"
                 />
+                <ResourcesEditModal :isOpen="false" />
             </div>
         </main>
     </div>
@@ -130,10 +138,12 @@
 <script>
 import axios from "axios";
 import ResourcesLoading from "../../../Components/ResourcesLoading.vue";
+import ResourcesEditModal from "../../../Components/ResourcesEditModal.vue";
 
 export default {
     components: {
         ResourcesLoading,
+        ResourcesEditModal,
     },
     data() {
         return {
@@ -143,6 +153,7 @@ export default {
             resourceTypeIds: [],
             meta: {},
             isLoading: false,
+            resourceEditing: false,
         };
     },
     methods: {

@@ -3,3 +3,4 @@
 @import "tailwindcss/utilities";
 @import "./custom.css";
 @import "./vendor/paginate.css";
+@import "./vendor/vue-select.css";
