@@ -19,11 +19,17 @@
                     />
 
                     <label for="filter">Filter Type</label>
-                    <select class="custom-input">
-                        <option>Select a option</option>
+                    <select
+                        v-model="resourceTypeIds"
+                        class="custom-input"
+                        data-testid="filter"
+                        multiple
+                    >
+                        <option value="">Filter by type</option>
                         <option
                             v-for="resourceType in resourceTypes"
                             v-bind:key="resourceType.id"
+                            v-bind:value="resourceType.id"
                         >
                             {{ resourceType.type }}
                         </option>
@@ -134,6 +140,7 @@ export default {
             search: "",
             resources: [],
             resourceTypes: [],
+            resourceTypeIds: [],
             meta: {},
             isLoading: false,
         };
@@ -141,15 +148,33 @@ export default {
     methods: {
         fetchResources(page = 1) {
             this.isLoading = true;
+
+            let resourceTypesString = "";
+
+            this.resourceTypeIds.forEach((resourceTypeId) => {
+                resourceTypesString += `resource_type_id[]=${resourceTypeId}&`;
+            });
+
             axios
-                .get(`/api/resources?page=${page}&search=${this.search}`)
+                .get(
+                    `/api/resources?page=${page}&search=${this.search}&${resourceTypesString}`
+                )
                 .then((response) => {
                     this.resources = response.data.data;
-                    console.error(this.resources);
                     this.meta = response.data.meta;
                 })
                 .catch(this.showError)
                 .finally(() => (this.isLoading = false));
+        },
+        fetchResourceTypes() {
+            this.isLoadingResourceTypes = true;
+            axios
+                .get("/api/resource-types")
+                .then((response) => {
+                    this.resourceTypes = response.data.data;
+                })
+                .catch(this.showError)
+                .finally(() => (this.isLoadingResourceTypes = false));
         },
         showError() {
             this.$swal("An error ocurred!", "Please try again later.");
@@ -160,9 +185,14 @@ export default {
             const firstPage = 1;
             this.fetchResources(firstPage);
         },
+        resourceTypeIds(newResourceTypeIds, oldResourceTypeIds) {
+            const firstPage = 1;
+            this.fetchResources(firstPage);
+        },
     },
     mounted() {
         this.fetchResources(1);
+        this.fetchResourceTypes();
     },
 };
 </script>

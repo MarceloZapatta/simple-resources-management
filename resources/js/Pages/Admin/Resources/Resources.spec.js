@@ -5,39 +5,62 @@ import "@testing-library/jest-dom";
 import axios from "axios";
 vi.resetModules();
 
-vi.spyOn(axios, "get").mockResolvedValue({
-    data: {
-        data: [
-            {
-                id: 1,
-                title: "Test 1",
-                description: "test",
-                resource_type: {
-                    type: "PDF",
+vi.spyOn(axios, "get")
+    .mockImplementation((argument) => {
+        console.log(argument);
+        return new Promise((resolve) => {
+            if (argument === '/api/resource-types') {
+                return resolve({
+                    data: {
+                        data: [
+                            {
+                                id: 1,
+                                type: "PDF",
+                            },
+                            {
+                                id: 2,
+                                type: "HTML snippet",
+                            },
+                        ],
+                    },
+                });
+            }
+
+            return resolve({
+                data: {
+                    data: [
+                        {
+                            id: 1,
+                            title: "Test 1",
+                            description: "test",
+                            resource_type: {
+                                type: "PDF",
+                            },
+                        },
+                        {
+                            id: 1,
+                            title: "Test 2",
+                            description: "test",
+                            resource_type: {
+                                type: "PDF",
+                            },
+                        },
+                        {
+                            id: 1,
+                            title: "Test 3",
+                            description: "test",
+                            resource_type: {
+                                type: "PDF",
+                            },
+                        },
+                    ],
+                    meta: {
+                        total: 1,
+                    },
                 },
-            },
-            {
-                id: 1,
-                title: "Test 2",
-                description: "test",
-                resource_type: {
-                    type: "PDF",
-                },
-            },
-            {
-                id: 1,
-                title: "Test 3",
-                description: "test",
-                resource_type: {
-                    type: "PDF",
-                },
-            },
-        ],
-        meta: {
-            total: 1,
-        },
-    },
-});
+            });
+        });
+    });
 
 afterEach(() => {
     vi.clearAllMocks();
@@ -57,8 +80,9 @@ it("render the component", () => {
 
 it("list resources", async () => {
     render(Resources);
-    expect(axios.get).toBeCalledWith("/api/resources?page=1&search=");
-    expect(axios.get).toBeCalledTimes(1);
+    expect(axios.get).toBeCalledWith("/api/resources?page=1&search=&");
+    expect(axios.get).toBeCalledWith("/api/resource-types");
+    expect(axios.get).toBeCalledTimes(2);
 
     await waitFor(() => expect(screen.getByText("Test 1")).toBeInTheDocument());
     expect(screen.getByText("Test 2")).toBeInTheDocument();
@@ -70,5 +94,17 @@ it("search resources", async () => {
 
     await fireEvent.update(screen.getByTestId("search"), "Test 2");
 
-    await waitFor(() => expect(axios.get).toBeCalledWith("/api/resources?page=1&search=Test 2"));
+    await waitFor(() =>
+        expect(axios.get).toBeCalledWith("/api/resources?page=1&search=Test 2&")
+    );
+
+    await waitFor(() => expect(screen.getByText("PDF")).toBeInTheDocument());
+
+    await fireEvent.change(screen.getByTestId('filter'), { target: { value: 2 } })
+
+    await waitFor(() =>
+        expect(axios.get).toBeCalledWith(
+            "/api/resources?page=1&search=Test 2&resource_type_id[]=2&"
+        )
+    );
 });
