@@ -19,8 +19,8 @@ import VueAwesomePaginate from "vue-awesome-paginate";
 import Resources from "./Pages/Admin/Resources/Resources.vue";
 import VueSelect from "vue-select";
 
-const admin = createApp(Resources)
+const app = createApp(Resources, { ...window.vueConfig })
     .use(VueAwesomePaginate)
     .use(VueSweetalert2)
     .component("v-select", VueSelect)
-    .mount("#admin");
+    .mount("#app");

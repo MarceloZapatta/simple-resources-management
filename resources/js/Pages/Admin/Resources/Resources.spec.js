@@ -72,7 +72,7 @@ it("render the component", () => {
 
     expect(screen.getByText("Simple Resources Management")).toBeInTheDocument();
     expect(screen.getByText("Search")).toBeInTheDocument();
-    expect(screen.getByText("Filter Type")).toBeInTheDocument();
+    expect(screen.getByText("Type Filter")).toBeInTheDocument();
     expect(screen.getByText("Add")).toBeInTheDocument();
     expect(screen.getByText("Title")).toBeInTheDocument();
     expect(screen.getByText("Description")).toBeInTheDocument();

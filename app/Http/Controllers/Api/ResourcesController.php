@@ -16,7 +16,7 @@ class ResourcesController extends Controller
      * ResourcesService
      *
      * @var ResourcesService
-     */ 
+     */
     private ResourcesService $resourcesService;
 
     /**
@@ -76,26 +76,15 @@ class ResourcesController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Resource $resource)
     {
-        $this->resourcesService->store($request);
+        $this->resourcesService->update($request, $resource);
 
         return response()->json([
             'message' => 'Success!'
@@ -108,8 +97,12 @@ class ResourcesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Resource $resource)
     {
-        //
+        $this->resourcesService->delete($resource);
+
+        return response()->json([
+            'message' => 'Success!'
+        ], 200);
     }
 }

@@ -7,48 +7,37 @@
         </header>
         <main>
             <div class="bg-white border-rounded m-6 p-4">
-                <div class="m-4">
-                    <label for="search">Search</label>
-                    <input
-                        data-testid="search"
-                        type="text"
-                        name="search"
-                        class="custom-input"
-                        v-model="search"
-                        placeholder="Search by title or description"
-                    />
-
-                    <label for="filter">Filter Type</label>
-                    <v-select
-                        v-model="resourceTypeIds"
-                        :options="resourceTypes"
-                        label="type"
-                        data-testid="filter"
-                        :reduce="(resourceType) => resourceType.id"
-                        :multiple="true"
-                    ></v-select>
-                    <!-- <select
-                        v-model="resourceTypeIds"
-                        class="custom-input"
-                        data-testid="filter"
-                        multiple
-                    >
-                        <option value="">Filter by type</option>
-                        <option
-                            v-for="resourceType in resourceTypes"
-                            v-bind:key="resourceType.id"
-                            v-bind:value="resourceType.id"
+                <div class="my-4 flex">
+                    <div class="w-1/2 p-2">
+                        <label for="search">Search</label>
+                        <input
+                            data-testid="search"
+                            type="text"
+                            name="search"
+                            class="custom-input"
+                            v-model="search"
+                            placeholder="Search by title or description"
+                        />
+                    </div>
+                    <div class="w-1/2 p-2">
+                        <label for="filter">Type Filter</label>
+                        <v-select
+                            v-model="resourceTypeIds"
+                            :options="resourceTypes"
+                            label="type"
+                            data-testid="filter"
+                            :reduce="(resourceType) => resourceType.id"
+                            :multiple="true"
+                        ></v-select>
+                    </div>
+                    <div v-if="isAdminPage">
+                        <button
+                            @click="this.addResource"
+                            class="button button-primary mt-6"
                         >
-                            {{ resourceType.type }}
-                        </option>
-                    </select> -->
-
-                    <button
-                        @click="this.addResource"
-                        class="button button-primary"
-                    >
-                        Add
-                    </button>
+                            Add
+                        </button>
+                    </div>
                 </div>
                 <table class="divide-y divide-gray-300 w-full">
                     <thead class="bg-gray-50">
@@ -60,6 +49,7 @@
                             </th>
                             <th
                                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                                v-if="isAdminPage"
                             >
                                 Description
                             </th>
@@ -101,17 +91,9 @@
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                v-if="isAdminPage"
                             >
-                                {{
-                                    resource && resource.description
-                                        ? resource.description.length > 40
-                                            ? resource.description.substring(
-                                                  0,
-                                                  40
-                                              ) + "..."
-                                            : resource.description
-                                        : null
-                                }}
+                                {{ this.getResourceDescription(resource) }}
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -120,6 +102,7 @@
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                                v-if="isAdminPage"
                             >
                                 <button
                                     @click.prevent="editResource(resource)"
@@ -132,6 +115,14 @@
                                     class="button button-danger"
                                 >
                                     Delete
+                                </button>
+                            </td>
+                            <td v-else>
+                                <button
+                                    class="button button-secondary"
+                                    @click="handleViewResource(resource)"
+                                >
+                                    View
                                 </button>
                             </td>
                         </tr>
@@ -162,7 +153,14 @@ import axios from "axios";
 import ResourcesLoading from "../../../Components/ResourcesLoading.vue";
 import ResourcesEditModal from "../../../Components/ResourcesEditModal.vue";
 
+const ResourceTypes = {
+    PDF: 1,
+    HTMLSnippet: 2,
+    Link: 3,
+};
+
 export default {
+    props: ["isAdminPage"],
     components: {
         ResourcesLoading,
         ResourcesEditModal,
@@ -256,6 +254,34 @@ export default {
         },
         openEditResourceModal(open = true) {
             this.resourceEditing = open;
+        },
+        getResourceDescription(resource) {
+            return resource && resource.description
+                ? resource.description.length > 40
+                    ? resource.description.substring(0, 40) + "..."
+                    : resource.description
+                : null;
+        },
+        handleViewResource(resource) {
+            switch (resource.resource_type.id) {
+                case ResourceTypes.PDF:
+                    window.open(resource.file, "_blank");
+                    break;
+                case ResourceTypes.HTMLSnippet:
+                    this.$swal({ text: resource.html_snippet });
+                    break;
+                case ResourceTypes.Link:
+                    window.open(
+                        resource.link,
+                        resource.open_new_tab ? "_blank" : "_self"
+                    );
+                    break;
+                default:
+                    break;
+            }
+            if (resource.resource_type.id === ResourceTypes.PDF) {
+                window.open(resource.file);
+            }
         },
     },
     watch: {

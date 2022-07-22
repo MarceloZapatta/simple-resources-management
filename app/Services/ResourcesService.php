@@ -58,6 +58,39 @@ class ResourcesService
         );
     }
 
+    /**
+     * Update the resource
+     *
+     * @param Request $request
+     * @param Resource $resource
+     * @return \App\Models\Resource
+     */
+    public function update(Request $request, Resource $resource): \App\Models\Resource
+    {
+        $resource->update(
+            $request->only([
+                'title',
+                'description',
+                'link',
+                'html_snippet',
+                'open_new_tab',
+                'resource_type_id'
+            ]));
+
+        return $resource->refresh();
+    }
+
+    /**
+     * Remove the resource
+     *
+     * @param Resource $resource
+     * @return boolean
+     */
+    public function delete(Resource $resource): bool
+    {
+        return $resource->delete();
+    }
+
     public function storePdf(File $pdf)
     {
     }

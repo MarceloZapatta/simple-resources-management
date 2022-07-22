@@ -3,7 +3,7 @@
 <div id="app"></div>
 <script>
     window.vueConfig = {
-        isAdminPage: true
+        isAdminPage: false
     }
 </script>
 @endsection
