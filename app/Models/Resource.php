@@ -15,7 +15,8 @@ class Resource extends Model
         'html_snippet',
         'link',
         'open_new_tab',
-        'resource_type_id'
+        'resource_type_id',
+        'file'
     ];
 
     public function resourceType()

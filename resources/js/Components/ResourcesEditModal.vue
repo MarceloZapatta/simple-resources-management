@@ -116,10 +116,12 @@
                                     <div v-if="isPDF">
                                         <label for="file">File upload</label>
                                         <input
+                                            ref="file"
                                             type="file"
                                             name="file"
                                             class="custom-input"
                                             accept="application/pdf"
+                                            @change="handleChangeFile"
                                         />
                                     </div>
                                 </div>
@@ -168,6 +170,7 @@ export default {
             resource: {
                 resource_type: {},
             },
+            file: null,
         };
     },
     methods: {
@@ -195,6 +198,7 @@ export default {
                     description: this.resource.description,
                     html_snippet: this.resource.html_snippet,
                     open_new_tab: this.resource.open_new_tab || false,
+                    file: this.file,
                 })
                 .then((response) => {
                     this.$swal("Success!", "Resource updated.").then(
@@ -206,14 +210,42 @@ export default {
         storeResource() {
             this.isLoading = true;
 
+            const formData = new FormData();
+
+            formData.append("resource_type_id", this.resource.resource_type.id);
+
+            if (this.resource.title) {
+                formData.append("title", this.resource.title);
+            }
+
+            if (this.resource.link) {
+                formData.append("link", this.resource.link);
+            }
+
+            if (this.resource.description) {
+                formData.append("description", this.resource.description);
+            }
+
+            if (this.resource.html_snippet) {
+                formData.append("html_snippet", this.resource.html_snippet);
+            }
+
+            if (this.resource.open_new_tab) {
+                formData.append(
+                    "open_new_tab",
+                    this.resource.open_new_tab || false
+                );
+            }
+
+            if (this.file) {
+                formData.append("file", this.file);
+            }
+
             axios
-                .post(`/api/resources`, {
-                    resource_type_id: this.resource.resource_type.id,
-                    title: this.resource.title,
-                    link: this.resource.link,
-                    description: this.resource.description,
-                    html_snippet: this.resource.html_snippet,
-                    open_new_tab: this.resource.open_new_tab || false,
+                .post(`/api/resources`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
                 })
                 .then((response) => {
                     this.$swal("Success!", "Resource created.").then(
@@ -227,6 +259,12 @@ export default {
                 resource_type: {},
             };
             this.$emit("onClose", refreshList);
+        },
+        handleChangeFile() {
+            console.log(this.$refs.file.files);
+            if (this.$refs.file.files && this.$refs.file.files.length > 0) {
+                this.file = this.$refs.file.files[0];
+            }
         },
     },
     mounted() {

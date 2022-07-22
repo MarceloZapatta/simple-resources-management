@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('description')->nullable()->default(NULL);
             $table->text('html_snippet')->nullable()->default(NULL);
-            $table->text('link')->nullable()->default(NULL);
+            $table->string('file')->nullable()->default(NULL);
+            $table->string('link')->nullable()->default(NULL);
             $table->boolean('open_new_tab')->default(false);
             $table->foreignId('resource_type_id')->constrained();
             $table->timestamps();

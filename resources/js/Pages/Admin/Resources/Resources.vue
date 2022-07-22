@@ -279,10 +279,7 @@ export default {
                 default:
                     break;
             }
-            if (resource.resource_type.id === ResourceTypes.PDF) {
-                window.open(resource.file);
-            }
-        },
+        }
     },
     watch: {
         search(newSearch, oldSearch) {

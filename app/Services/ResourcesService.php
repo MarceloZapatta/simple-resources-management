@@ -6,6 +6,7 @@ use App\Enums\ResourceTypeEnum;
 use App\Models\Resource;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ResourcesService
 {
@@ -40,22 +41,21 @@ class ResourcesService
      */
     public function store(Request $request): \App\Models\Resource
     {
-        if ($request->resource_type_id === ResourceTypeEnum::PDF) {
-            $request->merge([
-                'link' => $this->storePdf($request->file)
-            ]);
+        $filePath = false;
+
+        if ((int) $request->resource_type_id === ResourceTypeEnum::PDF->value) {
+            $filePath = $this->storePdf($request->file('file'));
         }
 
-        return Resource::create(
-            $request->only([
-                'title',
-                'description',
-                'link',
-                'html_snippet',
-                'open_new_tab',
-                'resource_type_id'
-            ])
-        );
+        return Resource::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'link' => $request->link,
+            'file' => $filePath ? $filePath : null,
+            'html_snippet' => $request->html_snippet,
+            'open_new_tab' => $request->open_new_tab ?? 0,
+            'resource_type_id' => $request->resource_type_id
+        ]);
     }
 
     /**
@@ -75,7 +75,8 @@ class ResourcesService
                 'html_snippet',
                 'open_new_tab',
                 'resource_type_id'
-            ]));
+            ])
+        );
 
         return $resource->refresh();
     }
@@ -91,7 +92,14 @@ class ResourcesService
         return $resource->delete();
     }
 
-    public function storePdf(File $pdf)
+    /**
+     * Store the pdf in public folder
+     *
+     * @param \Illuminate\Http\UploadedFile $pdf
+     * @return string
+     */
+    public function storePdf(\Illuminate\Http\UploadedFile $pdf): string
     {
+        return $pdf->store('public/pdfs');
     }
 }
