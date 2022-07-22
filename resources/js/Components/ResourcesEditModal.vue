@@ -145,6 +145,7 @@
                             class="button button-primary"
                             data-testid="button-submit"
                             @click="submit"
+                            :disabled="isLoading"
                         >
                             {{ this.resourceId ? "Edit" : "Add" }}
                         </button>
@@ -197,6 +198,8 @@ export default {
                 .finally(() => (this.isLoading = false));
         },
         submit() {
+            this.errors = {};
+
             return this.resource.id
                 ? this.updateResource()
                 : this.storeResource();
@@ -308,6 +311,7 @@ export default {
             this.resource = {
                 resource_type: {},
             };
+            this.errors = {};
             this.$emit("onClose", refreshList);
         },
         handleChangeFile() {
