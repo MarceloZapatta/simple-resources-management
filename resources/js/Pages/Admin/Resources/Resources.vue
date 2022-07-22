@@ -152,6 +152,7 @@
 import axios from "axios";
 import ResourcesLoading from "../../../Components/ResourcesLoading.vue";
 import ResourcesEditModal from "../../../Components/ResourcesEditModal.vue";
+import { htmlEncode } from "js-htmlencode";
 
 const ResourceTypes = {
     PDF: 1,
@@ -268,7 +269,33 @@ export default {
                     window.open(resource.file, "_blank");
                     break;
                 case ResourceTypes.HTMLSnippet:
-                    this.$swal({ text: resource.html_snippet });
+                    this.$swal({
+                        html:
+                            "<code>" +
+                            htmlEncode(resource.html_snippet) +
+                            "</code>",
+                        showCancelButton: true,
+                        cancelButtonText: "Copy",
+                    }).then((result) => {
+                        if (!result.isConfirmed) {
+                            var textArea = document.createElement("textarea");
+                            textArea.id = "temp-copy"
+                            textArea.value = resource.html_snippet;
+
+                            textArea.style.top = "0";
+                            textArea.style.left = "0";
+                            textArea.style.opacity = "0";
+                            textArea.style.position = "fixed";
+
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            document.execCommand('copy');
+                            textArea.remove()
+
+                            this.$swal("Copied succesfully!")
+                        }
+                    });
                     break;
                 case ResourceTypes.Link:
                     window.open(
@@ -279,7 +306,7 @@ export default {
                 default:
                     break;
             }
-        }
+        },
     },
     watch: {
         search(newSearch, oldSearch) {
