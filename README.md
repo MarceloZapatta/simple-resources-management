@@ -39,6 +39,7 @@
 ### How to test
 
 ##### Backend
+- Configure default testing database if you're not using Laravel Sail
 - ./vendor/bin/sail artisan test 
 or 
 - php artisan test
