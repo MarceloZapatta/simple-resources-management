@@ -5,6 +5,7 @@ namespace Tests\Unit\Api;
 use App\Enums\ResourceTypeEnum;
 use App\Models\Resource;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ResourceControllerTest extends TestCase
@@ -42,6 +43,7 @@ class ResourceControllerTest extends TestCase
                     'title' => $resource->title,
                     'description' => $resource->description,
                     'link' => $resource->link,
+                    'file' => null,
                     'html_snippet' => $resource->html_snippet,
                     'open_new_tab' => $resource->open_new_tab ? 1 : 0,
                     'resource_type' => $resource->resourceType
@@ -66,10 +68,12 @@ class ResourceControllerTest extends TestCase
             ->assertJsonValidationErrors(['resource_type_id']);
 
         $this->withHeaders([
-            'Accept' => 'application/json'
+            'Accept' => 'application/json',
+            'Content-Type' => 'multipart/form-data'
         ])->post(route('api.resources.store'), [
             'resource_type_id' => ResourceTypeEnum::PDF->value,
-            'title' => 'Test'
+            'title' => 'Test',
+            'file' => UploadedFile::fake()->create('test.pdf', 1000, 'application/pdf')
         ])
             ->assertStatus(201);
 

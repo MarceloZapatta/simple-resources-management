@@ -55,7 +55,7 @@ class ResourcesServiceTest extends TestCase
             'title' => 'Sample Resource',
             'description' => 'Sample Description',
             'html_snippet' => '<p>Dev is <b>awesome</b>!</p>',
-            'resource_type_id' => ResourceTypeEnum::HTMLSnippet
+            'resource_type_id' => ResourceTypeEnum::HTMLSnippet->value
         ]);
 
         $result = $resourcesService->store($request);

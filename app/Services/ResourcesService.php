@@ -43,7 +43,9 @@ class ResourcesService
     {
         $filePath = false;
 
-        if ((int) $request->resource_type_id === ResourceTypeEnum::PDF->value) {
+        $resourceTypeId = (int) $request->resource_type_id;
+        $resourceTypePDF = ResourceTypeEnum::PDF->value;
+        if ($resourceTypeId === $resourceTypePDF) {
             $filePath = $this->storePdf($request->file('file'));
         }
 
