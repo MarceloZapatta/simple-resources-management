@@ -24,13 +24,20 @@ class ResourceRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'resource_type_id' => 'required|exists:resource_types,id',
             'title' => 'required|max:255',
             'description' => 'required_if:resource_type_id,' . ResourceTypeEnum::HTMLSnippet->value,
             'link' => 'required_if:resource_type_id,' . ResourceTypeEnum::Link->value . '|url',
             'html_snippet' => 'required_if:resource_type_id,' . ResourceTypeEnum::HTMLSnippet->value,
-            'open_new_tab' => 'required_if:resource_type_id,' . ResourceTypeEnum::Link ->value. '|boolean'
+            'open_new_tab' => 'required_if:resource_type_id,' . ResourceTypeEnum::Link->value . '|boolean',
+            'file' => 'file|mimetypes|application/pdf'
         ];
+
+        if ($this->method() === 'POST') {
+            $rules['file'] = 'required_if:resource_type_id,' . ResourceTypeEnum::PDF->value . '|file|mimetypes:application/pdf';
+        }
+
+        return $rules;
     }
 }
