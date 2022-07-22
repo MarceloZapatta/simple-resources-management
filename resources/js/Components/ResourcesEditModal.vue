@@ -54,6 +54,9 @@
                                                 {{ resourceType.type }}
                                             </option>
                                         </select>
+                                        <Error
+                                            :error="errors.resource_type_id"
+                                        />
                                     </div>
                                     <div>
                                         <label for="title">Title</label>
@@ -65,6 +68,7 @@
                                             v-model="resource.title"
                                             data-testid="input-title"
                                         />
+                                        <Error :error="errors.title" />
                                     </div>
                                     <div v-if="isHTMLSnippet">
                                         <label for="description"
@@ -78,6 +82,7 @@
                                             class="custom-input"
                                             data-testid="textarea-description"
                                         ></textarea>
+                                        <Error :error="errors.description" />
                                     </div>
                                     <div v-if="isHTMLSnippet">
                                         <label for="html_snippet"
@@ -91,6 +96,7 @@
                                             class="custom-input"
                                             data-testid="textarea-html-snippet"
                                         ></textarea>
+                                        <Error :error="errors.html_snippet" />
                                     </div>
                                     <div v-if="isLink">
                                         <label for="link">Link</label>
@@ -101,6 +107,7 @@
                                             data-testid="input-link"
                                             v-model="resource.link"
                                         />
+                                        <Error :error="errors.link" />
                                     </div>
                                     <div v-if="isLink">
                                         <label for="open_new_tab">
@@ -113,6 +120,7 @@
                                             Open in a new tab
                                         </label>
                                     </div>
+                                    <Error :error="errors.open_new_tab" />
                                     <div v-if="isPDF">
                                         <label for="file">File upload</label>
                                         <input
@@ -124,6 +132,7 @@
                                             @change="handleChangeFile"
                                         />
                                     </div>
+                                    <Error :error="errors.file" />
                                 </div>
                             </div>
                         </div>
@@ -155,6 +164,7 @@
 
 <script>
 import axios from "axios";
+import Error from "./Error.vue";
 
 const ResourceTypes = {
     PDF: 1,
@@ -171,7 +181,11 @@ export default {
                 resource_type: {},
             },
             file: null,
+            errors: {},
         };
+    },
+    components: {
+        Error,
     },
     methods: {
         fetchResource() {
@@ -204,6 +218,22 @@ export default {
                     this.$swal("Success!", "Resource updated.").then(
                         this.handleClose(true)
                     );
+                })
+                .catch((error) => {
+                    if (
+                        error &&
+                        error.response &&
+                        error.response.status === 422 &&
+                        error.response.errors
+                    ) {
+                        this.errors = error.response.errors.map(
+                            (index, key) => {
+                                let error = {};
+                                error.key = index[0];
+                            }
+                        );
+                    }
+                    throw error;
                 })
                 .finally(() => (this.isLoading = false));
         },
@@ -251,6 +281,26 @@ export default {
                     this.$swal("Success!", "Resource created.").then(
                         this.handleClose(true)
                     );
+                })
+                .catch((error) => {
+                    console.log(error);
+                    if (
+                        error &&
+                        error.response &&
+                        error.response.status === 422 &&
+                        error.response.data &&
+                        error.response.data.errors
+                    ) {
+                        let errorsMap = {};
+                        Object.entries(error.response.data.errors).forEach(
+                            (item) => {
+                                errorsMap[item[0]] = item[1][0];
+                            }
+                        );
+                        this.errors = errorsMap;
+                        return;
+                    }
+                    throw error;
                 })
                 .finally(() => (this.isLoading = false));
         },
