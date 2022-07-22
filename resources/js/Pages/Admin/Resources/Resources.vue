@@ -43,7 +43,12 @@
                         </option>
                     </select> -->
 
-                    <button @click="this.addResource">Add</button>
+                    <button
+                        @click="this.addResource"
+                        class="button button-primary"
+                    >
+                        Add
+                    </button>
                 </div>
                 <table class="divide-y divide-gray-300 w-full">
                     <thead class="bg-gray-50">
@@ -88,7 +93,6 @@
                         <tr
                             v-for="resource in resources"
                             v-bind:key="resource.id"
-                            @click="editResource(resource)"
                         >
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -99,12 +103,14 @@
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
                                 {{
-                                    resource.description.length > 40
-                                        ? resource.description.substring(
-                                              0,
-                                              40
-                                          ) + "..."
-                                        : resource.description
+                                    resource && resource.description
+                                        ? resource.description.length > 40
+                                            ? resource.description.substring(
+                                                  0,
+                                                  40
+                                              ) + "..."
+                                            : resource.description
+                                        : null
                                 }}
                             </td>
                             <td
@@ -116,12 +122,17 @@
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
                                 <button
-                                    @click="editResource(resource)"
+                                    @click.prevent="editResource(resource)"
+                                    class="button button-secondary"
                                 >
                                     Edit
                                 </button>
-                                <button>Download</button>
-                                <button>Open</button>
+                                <button
+                                    @click.prevent="deleteResource(resource)"
+                                    class="button button-danger"
+                                >
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                     </tbody>
@@ -166,10 +177,14 @@ export default {
             isLoading: false,
             resourceEditing: false,
             resourceEdit: {},
+            page: 1,
         };
     },
     methods: {
-        fetchResources(page = 1) {
+        handlePageClick(page) {
+            this.page = page;
+        },
+        fetchResources() {
             this.isLoading = true;
 
             let resourceTypesString = "";
@@ -180,7 +195,7 @@ export default {
 
             axios
                 .get(
-                    `/api/resources?page=${page}&search=${this.search}&${resourceTypesString}`
+                    `/api/resources?page=${this.page}&search=${this.search}&${resourceTypesString}`
                 )
                 .then((response) => {
                     this.resources = response.data.data;
@@ -202,13 +217,39 @@ export default {
         showError() {
             this.$swal("An error ocurred!", "Please try again later.");
         },
-        handleCloseModal() {
+        handleCloseModal(refreshList) {
             this.resourceEdit = {};
             this.openEditResourceModal(false);
+
+            if (refreshList) {
+                this.fetchResources();
+            }
         },
         editResource(resource) {
             this.resourceEdit = resource;
             this.openEditResourceModal();
+        },
+        deleteResource(resource) {
+            this.$swal({
+                title: "Are you sure?",
+                showCancelButton: true,
+                confirmButtonText: "Delete",
+                denyButtonText: "Cancel",
+                focusConfirm: false,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios
+                        .delete(`/api/resources/${resource.id}`)
+                        .then(() => {
+                            this.fetchResources();
+                            this.$swal(
+                                "Success!",
+                                "Resource removed with success."
+                            );
+                        })
+                        .catch((error) => this.showError());
+                }
+            });
         },
         addResource() {
             this.openEditResourceModal();
@@ -219,16 +260,21 @@ export default {
     },
     watch: {
         search(newSearch, oldSearch) {
-            const firstPage = 1;
-            this.fetchResources(firstPage);
+            this.page = 1;
+            this.fetchResources();
         },
         resourceTypeIds(newResourceTypeIds, oldResourceTypeIds) {
-            const firstPage = 1;
-            this.fetchResources(firstPage);
+            this.page = 1;
+            this.fetchResources();
+        },
+        page(oldValue, newValue) {
+            if (newValue != oldValue && newValue != this.meta.page) {
+                this.fetchResources();
+            }
         },
     },
     mounted() {
-        this.fetchResources(1);
+        this.fetchResources();
         this.fetchResourceTypes();
     },
 };
