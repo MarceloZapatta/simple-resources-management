@@ -36,6 +36,8 @@
                                             name="resource_type_id"
                                             v-model="resource.resource_type.id"
                                             class="custom-input"
+                                            required
+                                            data-testid="select-type"
                                         >
                                             <option
                                                 placeholder
@@ -61,11 +63,10 @@
                                             class="custom-input"
                                             ref="title"
                                             v-model="resource.title"
+                                            data-testid="input-title"
                                         />
                                     </div>
-                                    <div
-                                        v-if="isHTMLSnippet"
-                                    >
+                                    <div v-if="isHTMLSnippet">
                                         <label for="description"
                                             >Snippet description</label
                                         >
@@ -75,11 +76,10 @@
                                             rows="5"
                                             v-model="resource.description"
                                             class="custom-input"
+                                            data-testid="textarea-description"
                                         ></textarea>
                                     </div>
-                                    <div
-                                        v-if="isHTMLSnippet"
-                                    >
+                                    <div v-if="isHTMLSnippet">
                                         <label for="html_snippet"
                                             >HTML Snippet</label
                                         >
@@ -89,34 +89,31 @@
                                             rows="5"
                                             v-model="resource.html_snippet"
                                             class="custom-input"
+                                            data-testid="textarea-html-snippet"
                                         ></textarea>
                                     </div>
-                                    <div
-                                        v-if="isLink"
-                                    >
+                                    <div v-if="isLink">
                                         <label for="link">Link</label>
                                         <input
                                             name="link"
-                                            type="text"
+                                            type="url"
                                             class="custom-input"
+                                            data-testid="input-link"
                                             v-model="resource.link"
                                         />
                                     </div>
-                                    <div
-                                        v-if="isLink"
-                                    >
+                                    <div v-if="isLink">
                                         <label for="open_new_tab">
                                             <input
                                                 name="open_new_tab"
                                                 type="checkbox"
                                                 v-model="resource.open_new_tab"
+                                                data-testid="checkbox-open-new-tab"
                                             />
                                             Open in a new tab
                                         </label>
                                     </div>
-                                    <div
-                                        v-if="isPDF"
-                                    >
+                                    <div v-if="isPDF">
                                         <label for="file">File upload</label>
                                         <input
                                             type="file"
@@ -135,6 +132,8 @@
                         <button
                             type="button"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            data-testid="button-submit"
+                            @click="storeResource"
                         >
                             {{ this.resourceId ? "Edit" : "Add" }}
                         </button>
@@ -178,6 +177,25 @@ export default {
             axios
                 .get(`/api/resources/${this.resourceId}`)
                 .then((response) => (this.resource = response.data.data))
+                .finally(() => (this.isLoading = false));
+        },
+        storeResource() {
+            this.isLoading = true;
+
+            axios
+                .post(`/api/resources`, {
+                    resource_type_id: this.resource.resource_type.id,
+                    title: this.resource.title,
+                    link: this.resource.link,
+                    description: this.resource.description,
+                    html_snippet: this.resource.html_snippet,
+                    open_new_tab: this.resource.open_new_tab,
+                })
+                .then((response) => {
+                    this.$swal("Success!", "Resource created.").then(
+                        this.handleClose
+                    );
+                })
                 .finally(() => (this.isLoading = false));
         },
         async handleClose() {
