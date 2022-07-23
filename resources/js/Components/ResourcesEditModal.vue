@@ -37,6 +37,10 @@
                                             v-model="resource.resource_type.id"
                                             class="custom-input"
                                             required
+                                            v-bind:class="{
+                                                '!border-red-600':
+                                                    errors.resource_type_id,
+                                            }"
                                             data-testid="select-type"
                                         >
                                             <option
@@ -65,6 +69,9 @@
                                             type="text"
                                             class="custom-input"
                                             ref="title"
+                                            v-bind:class="{
+                                                '!border-red-600': errors.title,
+                                            }"
                                             v-model="resource.title"
                                             data-testid="input-title"
                                         />
@@ -80,6 +87,10 @@
                                             rows="5"
                                             v-model="resource.description"
                                             class="custom-input"
+                                            v-bind:class="{
+                                                '!border-red-600':
+                                                    errors.description,
+                                            }"
                                             data-testid="textarea-description"
                                         ></textarea>
                                         <Error :error="errors.description" />
@@ -94,6 +105,10 @@
                                             rows="5"
                                             v-model="resource.html_snippet"
                                             class="custom-input"
+                                            v-bind:class="{
+                                                '!border-red-600':
+                                                    errors.html_snippet,
+                                            }"
                                             data-testid="textarea-html-snippet"
                                         ></textarea>
                                         <Error :error="errors.html_snippet" />
@@ -105,6 +120,9 @@
                                             type="url"
                                             class="custom-input"
                                             data-testid="input-link"
+                                            v-bind:class="{
+                                                '!border-red-600': errors.link,
+                                            }"
                                             v-model="resource.link"
                                         />
                                         <Error :error="errors.link" />
@@ -116,6 +134,10 @@
                                                 type="checkbox"
                                                 v-model="resource.open_new_tab"
                                                 data-testid="checkbox-open-new-tab"
+                                                v-bind:class="{
+                                                    '!border-red-600':
+                                                        errors.open_new_tab,
+                                                }"
                                             />
                                             Open in a new tab
                                         </label>
@@ -129,6 +151,9 @@
                                             name="file"
                                             class="custom-input"
                                             accept="application/pdf"
+                                            v-bind:class="{
+                                                '!border-red-600': errors.file,
+                                            }"
                                             @change="handleChangeFile"
                                         />
                                     </div>
@@ -286,7 +311,6 @@ export default {
                     );
                 })
                 .catch((error) => {
-                    console.log(error);
                     if (
                         error &&
                         error.response &&

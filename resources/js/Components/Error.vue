@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import './Error.css';
+
 export default {
     props: ['error']
 }
