@@ -6,69 +6,71 @@ import axios from "axios";
 import Vue from "vue";
 vi.resetModules();
 
-vi.spyOn(axios, "get")
-    .mockImplementation((argument) => {
-        console.log(argument);
-        return new Promise((resolve) => {
-            if (argument === '/api/resource-types') {
-                return resolve({
-                    data: {
-                        data: [
-                            {
-                                id: 1,
-                                type: "PDF",
-                            },
-                            {
-                                id: 2,
-                                type: "HTML snippet",
-                            },
-                        ],
-                    },
-                });
-            }
-
+vi.spyOn(axios, "get").mockImplementation((argument) => {
+    return new Promise((resolve) => {
+        if (argument === "/api/resource-types") {
             return resolve({
                 data: {
                     data: [
                         {
                             id: 1,
-                            title: "Test 1",
-                            description: "test",
-                            resource_type: {
-                                type: "PDF",
-                            },
+                            type: "PDF",
                         },
                         {
-                            id: 1,
-                            title: "Test 2",
-                            description: "test",
-                            resource_type: {
-                                type: "PDF",
-                            },
-                        },
-                        {
-                            id: 1,
-                            title: "Test 3",
-                            description: "test",
-                            resource_type: {
-                                type: "PDF",
-                            },
+                            id: 2,
+                            type: "HTML snippet",
                         },
                     ],
-                    meta: {
-                        total: 1,
-                    },
                 },
             });
+        }
+
+        return resolve({
+            data: {
+                data: [
+                    {
+                        id: 1,
+                        title: "Test 1",
+                        description: "test",
+                        resource_type: {
+                            type: "PDF",
+                        },
+                    },
+                    {
+                        id: 1,
+                        title: "Test 2",
+                        description: "test",
+                        resource_type: {
+                            type: "PDF",
+                        },
+                    },
+                    {
+                        id: 1,
+                        title: "Test 3",
+                        description: "test",
+                        resource_type: {
+                            type: "PDF",
+                        },
+                    },
+                ],
+                meta: {
+                    total: 1,
+                },
+            },
         });
     });
+});
 
 afterEach(() => {
     vi.clearAllMocks();
 });
 
 it("render the component", () => {
-    render(Resources);
+    render(Resources, {
+        props: {
+            isAdminPage: true,
+        },
+    });
 
     expect(screen.getByText("Simple Resources Management")).toBeInTheDocument();
     expect(screen.getByText("Search")).toBeInTheDocument();

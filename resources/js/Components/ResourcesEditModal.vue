@@ -149,6 +149,7 @@
                                             ref="file"
                                             type="file"
                                             name="file"
+                                            data-testid="input-file"
                                             class="custom-input"
                                             accept="application/pdf"
                                             v-bind:class="{

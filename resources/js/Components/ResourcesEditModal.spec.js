@@ -1,4 +1,6 @@
 import {
+    findByTestId,
+    findByText,
     getByDisplayValue,
     render,
     screen,
@@ -26,6 +28,10 @@ vi.spyOn(axios, "get").mockResolvedValue({
 
 vi.spyOn(axios, "post").mockResolvedValue({
     messsage: "Success!",
+});
+
+vi.mock("FormData", () => {
+    append: vi.fn();
 });
 
 const resourceTypes = [
@@ -117,9 +123,12 @@ it("add a pdf resource", async () => {
 
     const select = getByTestId("select-type");
 
+    const optionPDF = 1;
     userEvent.selectOptions(select, "1");
 
-    await waitFor(() => getByText("File upload"));
+    const file = new File(["there"], "there.pdf", { type: "application/pdf" });
+
+    expect(await screen.findByText("File upload")).toBeInTheDocument();
 
     await userEvent.type(getByTestId("input-title"), "Test title");
 
@@ -127,16 +136,22 @@ it("add a pdf resource", async () => {
         expect(getByTestId("input-title")).toHaveValue("Test title")
     );
 
-    userEvent.click(getByTestId("button-submit"));
+    const inputFile = await screen.findByTestId("input-file");
+    await userEvent.upload(inputFile, file);
+
+    expect(inputFile.files).toHaveLength(1);
+    expect(inputFile.files[0]).toBe(file);
+
+    userEvent.click(screen.getByTestId("button-submit"));
+
+    const formData = new FormData();
+    formData.append("resource_type_id", optionPDF);
+    formData.append("title", "Test title");
+    formData.append("file", file);
 
     await waitFor(() =>
-        expect(axios.post).toBeCalledWith("/api/resources", {
-            resource_type_id: 1,
-            title: "Test title",
-            link: undefined,
-            description: undefined,
-            html_snippet: undefined,
-            open_new_tab: undefined,
+        expect(axios.post).toBeCalledWith("/api/resources", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
         })
     );
 });
@@ -173,14 +188,16 @@ it("add a html resource", async () => {
 
     userEvent.click(getByTestId("button-submit"));
 
+    const formData = new FormData();
+    const resourceTypeIdHTML = 2;
+    formData.append("resource_type_id", resourceTypeIdHTML);
+    formData.append("title", "Test title");
+    formData.append("description", "Lorem ipsum dors met");
+    formData.append("html_snippet", "<html></html>");
+
     await waitFor(() =>
-        expect(axios.post).toBeCalledWith("/api/resources", {
-            resource_type_id: 2,
-            title: "Test title",
-            link: undefined,
-            description: "Lorem ipsum dors met",
-            html_snippet: "<html></html>",
-            open_new_tab: undefined,
+        expect(axios.post).toBeCalledWith("/api/resources", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
         })
     );
 });
@@ -212,14 +229,16 @@ it("add a link resource", async () => {
 
     userEvent.click(getByTestId("button-submit"));
 
+    const formData = new FormData();
+    const resourceTypeIdLink = 3;
+    formData.append("resource_type_id", resourceTypeIdLink);
+    formData.append("title", "Test title");
+    formData.append("link", "https://google.com");
+    formData.append("open_new_tab", true);
+
     await waitFor(() =>
-        expect(axios.post).toBeCalledWith("/api/resources", {
-            resource_type_id: 3,
-            title: "Test title",
-            link: "https://google.com",
-            description: undefined,
-            html_snippet: undefined,
-            open_new_tab: true,
+        expect(axios.post).toBeCalledWith("/api/resources", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
         })
     );
 });
