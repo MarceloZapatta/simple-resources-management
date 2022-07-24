@@ -65,6 +65,7 @@
                                     <div>
                                         <label for="title">Title</label>
                                         <input
+                                            id="title"
                                             name="title"
                                             type="text"
                                             class="custom-input"
@@ -116,6 +117,7 @@
                                     <div v-if="isLink">
                                         <label for="link">Link</label>
                                         <input
+                                            id="link"
                                             name="link"
                                             type="url"
                                             class="custom-input"
@@ -233,15 +235,40 @@ export default {
         updateResource() {
             this.isLoading = true;
 
+            const formData = new FormData();
+
+            formData.append("resource_type_id", this.resource.resource_type.id);
+
+            if (this.resource.title) {
+                formData.append("title", this.resource.title);
+            }
+
+            if (this.resource.link) {
+                formData.append("link", this.resource.link);
+            }
+
+            if (this.resource.description) {
+                formData.append("description", this.resource.description);
+            }
+
+            if (this.resource.html_snippet) {
+                formData.append("html_snippet", this.resource.html_snippet);
+            }
+
+            if (this.resource.open_new_tab) {
+                formData.append(
+                    "open_new_tab",
+                    this.resource.open_new_tab || false
+                );
+            }
+
+            if (this.file) {
+                formData.append("file", this.file);
+            }
+
             axios
-                .put(`/api/resources/${this.resource.id}`, {
-                    resource_type_id: this.resource.resource_type.id,
-                    title: this.resource.title,
-                    link: this.resource.link,
-                    description: this.resource.description,
-                    html_snippet: this.resource.html_snippet,
-                    open_new_tab: this.resource.open_new_tab || false,
-                    file: this.file,
+                .put(`/api/resources/${this.resource.id}`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
                 })
                 .then((response) => {
                     this.$swal("Success!", "Resource updated.").then(
@@ -340,7 +367,6 @@ export default {
             this.$emit("onClose", refreshList);
         },
         handleChangeFile() {
-            console.log(this.$refs.file.files);
             if (this.$refs.file.files && this.$refs.file.files.length > 0) {
                 this.file = this.$refs.file.files[0];
             }
@@ -372,7 +398,7 @@ export default {
         },
     },
     updated() {
-        if (this.resourceId && this.resourceId !== this.resource.id) {
+        if (this.resourceId && this.resourceId !== this.resource.id && !this.isLoading) {
             this.fetchResource();
         }
     },
