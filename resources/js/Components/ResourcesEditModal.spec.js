@@ -441,7 +441,10 @@ describe("Resources Edit Modal", () => {
             await screen.findByDisplayValue("Test title")
         ).toBeInTheDocument();
 
-        await userEvent.type(screen.getByTestId("input-link"), "https://www.remotecompany.com");
+        await userEvent.type(
+            screen.getByTestId("input-link"),
+            "https://www.remotecompany.com"
+        );
         expect(
             await screen.findByDisplayValue("https://www.remotecompany.com")
         ).toBeInTheDocument();
@@ -517,4 +520,134 @@ describe("Resources Edit Modal", () => {
             })
         );
     });
+
+    it("display errors store", async () => {
+        const user = userEvent.setup();
+        axios.post.mockRejectedValueOnce({
+            response: {
+                status: 422,
+                data: {
+                    errors: {
+                        resource_type_id: [
+                            "The selected resource type id is invalid.",
+                        ],
+                        title: ["The title field is required."],
+                    },
+                },
+            },
+        });
+
+        render(ResourcesEditModal, {
+            props: {
+                isOpen: true,
+                resourceTypes: resourceTypes,
+                resourceId: false,
+            },
+            global: {
+                mocks: {
+                    $swal: vi.fn().mockResolvedValue(true),
+                },
+            },
+        });
+
+        await userEvent.click(screen.getByTestId("button-submit"));
+
+        expect(
+            await screen.findByText("The selected resource type id is invalid.")
+        ).toBeInTheDocument();
+        expect(
+            await screen.findByText("The title field is required.")
+        ).toBeInTheDocument();
+    });
+
+    it("display errors update", async () => {
+        const user = userEvent.setup();
+        axios.put.mockRejectedValueOnce({
+            response: {
+                status: 422,
+                data: {
+                    errors: {
+                        resource_type_id: [
+                            "The selected resource type id is invalid.",
+                        ],
+                        title: ["The title field is required."],
+                    },
+                },
+            },
+        });
+
+        render(ResourcesEditModal, {
+            props: {
+                isOpen: true,
+                resourceTypes: resourceTypes,
+                resourceId: 1,
+            },
+            global: {
+                mocks: {
+                    $swal: vi.fn().mockResolvedValue(true),
+                },
+            },
+        });
+
+        expect(await screen.findByText("File upload")).toBeInTheDocument();
+
+        await userEvent.click(screen.getByTestId("button-submit"));
+
+        await waitFor(() => expect(axios.put).toBeCalledTimes(1));
+
+        expect(
+            await screen.findByText("The selected resource type id is invalid.")
+        ).toBeInTheDocument();
+        expect(
+            await screen.findByText("The title field is required.")
+        ).toBeInTheDocument();
+    });
+
+    it("close modal", async () => {
+        const user = userEvent.setup();
+
+        const { emitted } = render(ResourcesEditModal, {
+            props: {
+                isOpen: true,
+                resourceTypes: resourceTypes,
+                resourceId: false,
+            },
+        });
+
+        await userEvent.click(screen.getByTestId("button-cancel"));
+
+        expect(emitted().onClose).toBeTruthy();
+    });
+
+    it ("unhandled response", async () => {
+
+        const user = userEvent.setup();
+        axios.post.mockRejectedValueOnce({
+            response: {
+                status: 500,
+                data: {
+                    errors: "some random error",
+                },
+            },
+        });
+
+        const $swal = vi.fn();
+
+        render(ResourcesEditModal, {
+            props: {
+                isOpen: true,
+                resourceTypes: resourceTypes,
+                resourceId: false,
+            },
+            global: {
+                mocks: {
+                    $swal,
+                },
+            },
+        });
+
+        await userEvent.click(screen.getByTestId("button-submit"));
+
+        expect($swal).toBeCalledWith("An error ocurred!", "Please try again later.")
+    })
 });

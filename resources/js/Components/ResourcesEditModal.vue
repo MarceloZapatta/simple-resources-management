@@ -180,6 +180,7 @@
                         <button
                             type="button"
                             class="button button-secondary"
+                            data-testid="button-cancel"
                             @click="handleClose"
                         >
                             Cancel
@@ -275,22 +276,7 @@ export default {
                         this.handleClose(true)
                     );
                 })
-                .catch((error) => {
-                    if (
-                        error &&
-                        error.response &&
-                        error.response.status === 422 &&
-                        error.response.errors
-                    ) {
-                        this.errors = error.response.errors.map(
-                            (index, key) => {
-                                let error = {};
-                                error.key = index[0];
-                            }
-                        );
-                    }
-                    throw error;
-                })
+                .catch(this.handleApiErrors)
                 .finally(() => (this.isLoading = false));
         },
         storeResource() {
@@ -338,25 +324,7 @@ export default {
                         this.handleClose(true)
                     );
                 })
-                .catch((error) => {
-                    if (
-                        error &&
-                        error.response &&
-                        error.response.status === 422 &&
-                        error.response.data &&
-                        error.response.data.errors
-                    ) {
-                        let errorsMap = {};
-                        Object.entries(error.response.data.errors).forEach(
-                            (item) => {
-                                errorsMap[item[0]] = item[1][0];
-                            }
-                        );
-                        this.errors = errorsMap;
-                        return;
-                    }
-                    throw error;
-                })
+                .catch(this.handleApiErrors)
                 .finally(() => (this.isLoading = false));
         },
         async handleClose(refreshList = false) {
@@ -370,6 +338,26 @@ export default {
             if (this.$refs.file.files && this.$refs.file.files.length > 0) {
                 this.file = this.$refs.file.files[0];
             }
+        },
+        handleApiErrors(error) {
+            if (
+                error &&
+                error.response &&
+                error.response.status === 422 &&
+                error.response.data &&
+                error.response.data.errors
+            ) {
+                let errorsMap = {};
+                Object.entries(error.response.data.errors).forEach((item) => {
+                    errorsMap[item[0]] = item[1][0];
+                });
+                this.errors = errorsMap;
+                return;
+            }
+            this.showError();
+        },
+        showError() {
+            this.$swal("An error ocurred!", "Please try again later.");
         },
     },
     mounted() {
@@ -398,7 +386,11 @@ export default {
         },
     },
     updated() {
-        if (this.resourceId && this.resourceId !== this.resource.id && !this.isLoading) {
+        if (
+            this.resourceId &&
+            this.resourceId !== this.resource.id &&
+            !this.isLoading
+        ) {
             this.fetchResource();
         }
     },
