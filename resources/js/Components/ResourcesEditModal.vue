@@ -195,6 +195,7 @@
 <script>
 import axios from "axios";
 import Error from "./Error.vue";
+import ResourcesService from "./../Services/ResourcesService.js";
 
 const ResourceTypes = {
     PDF: 1,
@@ -221,8 +222,7 @@ export default {
         fetchResource() {
             this.isLoading = true;
 
-            axios
-                .get(`/api/resources/${this.resourceId}`)
+            ResourcesService.find(this.resourceId)
                 .then((response) => (this.resource = response.data.data))
                 .finally(() => (this.isLoading = false));
         },
@@ -236,41 +236,7 @@ export default {
         updateResource() {
             this.isLoading = true;
 
-            const formData = new FormData();
-
-            formData.append("resource_type_id", this.resource.resource_type.id);
-
-            if (this.resource.title) {
-                formData.append("title", this.resource.title);
-            }
-
-            if (this.resource.link) {
-                formData.append("link", this.resource.link);
-            }
-
-            if (this.resource.description) {
-                formData.append("description", this.resource.description);
-            }
-
-            if (this.resource.html_snippet) {
-                formData.append("html_snippet", this.resource.html_snippet);
-            }
-
-            if (this.resource.open_new_tab) {
-                formData.append(
-                    "open_new_tab",
-                    this.resource.open_new_tab || false
-                );
-            }
-
-            if (this.file) {
-                formData.append("file", this.file);
-            }
-
-            axios
-                .put(`/api/resources/${this.resource.id}`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
+            ResourcesService.update(this.resource, this.file)
                 .then((response) => {
                     this.$swal("Success!", "Resource updated.").then(
                         this.handleClose(true)
@@ -282,43 +248,7 @@ export default {
         storeResource() {
             this.isLoading = true;
 
-            const formData = new FormData();
-
-            formData.append("resource_type_id", this.resource.resource_type.id);
-
-            if (this.resource.title) {
-                formData.append("title", this.resource.title);
-            }
-
-            if (this.resource.link) {
-                formData.append("link", this.resource.link);
-            }
-
-            if (this.resource.description) {
-                formData.append("description", this.resource.description);
-            }
-
-            if (this.resource.html_snippet) {
-                formData.append("html_snippet", this.resource.html_snippet);
-            }
-
-            if (this.resource.open_new_tab) {
-                formData.append(
-                    "open_new_tab",
-                    this.resource.open_new_tab || false
-                );
-            }
-
-            if (this.file) {
-                formData.append("file", this.file);
-            }
-
-            axios
-                .post(`/api/resources`, formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                })
+            ResourcesService.store(this.resource, this.file)
                 .then((response) => {
                     this.$swal("Success!", "Resource created.").then(
                         this.handleClose(true)
