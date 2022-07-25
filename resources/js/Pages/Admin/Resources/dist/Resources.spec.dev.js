@@ -214,7 +214,7 @@ it("open modal add resource", function _callee3() {
   });
 });
 it("open modal edit resource", function _callee4() {
-  var user, buttonEdit;
+  var user, buttonEdit, buttonCancel;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
@@ -244,16 +244,22 @@ it("open modal edit resource", function _callee4() {
 
         case 11:
           _context4.t1 = _context4.sent;
-          (0, _context4.t0)(_context4.t1);
+          (0, _context4.t0)(_context4.t1).toBeInTheDocument();
           _context4.t2 = _vitest.expect;
           _context4.next = 16;
           return regeneratorRuntime.awrap(_vue.screen.findByText(/Edit Resource/i));
 
         case 16:
           _context4.t3 = _context4.sent;
-          (0, _context4.t2)(_context4.t3);
+          (0, _context4.t2)(_context4.t3).toBeInTheDocument();
+          _context4.next = 20;
+          return regeneratorRuntime.awrap(_vue.screen.findByText("Cancel"));
 
-        case 18:
+        case 20:
+          buttonCancel = _context4.sent;
+          user.click(buttonCancel);
+
+        case 22:
         case "end":
           return _context4.stop();
       }

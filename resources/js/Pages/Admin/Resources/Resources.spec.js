@@ -106,11 +106,7 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-const stubs = [
-    "ResourcesLoading",
-    "v-select",
-    "vue-awesome-paginate",
-];
+const stubs = ["ResourcesLoading", "v-select", "vue-awesome-paginate"];
 
 it("render the component", () => {
     render(Resources, {
@@ -185,11 +181,15 @@ it("open modal edit resource", async () => {
     await waitFor(() => expect(axios.get).toBeCalledTimes(2));
 
     const buttonEdit = await screen.findByTestId("button-edit-1");
-    
+
     user.click(buttonEdit);
 
-    expect(await screen.findByText(/Test 1/i));
-    expect(await screen.findByText(/Edit Resource/i));
+    expect(await screen.findByText(/Test 1/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Edit Resource/i)).toBeInTheDocument();
+
+    const buttonCancel = await screen.findByText("Cancel");
+
+    user.click(buttonCancel);
 });
 
 it("handle view resource", async () => {
