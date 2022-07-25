@@ -75,6 +75,7 @@ describe("Resources Edit Modal", () => {
         render(ResourcesEditModal, {
             props: {
                 isOpen: false,
+                resourceTypes: resourceTypes,
             },
         });
 
@@ -85,6 +86,7 @@ describe("Resources Edit Modal", () => {
         render(ResourcesEditModal, {
             props: {
                 isOpen: true,
+                resourceTypes: resourceTypes,
                 resourceId: 1,
             },
         });

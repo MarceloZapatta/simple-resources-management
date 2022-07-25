@@ -11,7 +11,20 @@ import Resources from "./Resources.vue";
 import "@testing-library/jest-dom";
 import axios from "axios";
 import Vue from "vue";
+import { VueSelect } from "vue-select";
+import ResourcesLoading from "../../../Components/ResourcesLoading.vue";
+import ResourcesEditModal from "../../../Components/ResourcesEditModal.vue";
+import VueAwesomePaginate from "vue-awesome-paginate";
+
 vi.resetModules();
+
+const originalWarn = window.console.warn;
+
+window.console.warn = (e) => {
+    return e.includes("If this is a native custom element")
+        ? ""
+        : originalWarn(e);
+};
 
 vi.spyOn(axios, "get").mockImplementation((argument) => {
     return new Promise((resolve) => {
@@ -32,39 +45,55 @@ vi.spyOn(axios, "get").mockImplementation((argument) => {
             });
         }
 
+        if (argument.includes("/api/resources")) {
+            resolve({
+                data: {
+                    data: [
+                        {
+                            id: 1,
+                            title: "Test 1",
+                            description: "test",
+                            resource_type: {
+                                id: 1,
+                                type: "PDF",
+                            },
+                        },
+                        {
+                            id: 2,
+                            title: "Test 2",
+                            description: "test",
+                            resource_type: {
+                                id: 1,
+                                type: "PDF",
+                            },
+                        },
+                        {
+                            id: 3,
+                            title: "Test 3",
+                            description: "test",
+                            resource_type: {
+                                id: 1,
+                                type: "PDF",
+                            },
+                        },
+                    ],
+                    meta: {
+                        total: 1,
+                    },
+                },
+            });
+        }
+
         return resolve({
             data: {
-                data: [
-                    {
+                data: {
+                    id: 1,
+                    title: "Test 1",
+                    description: "test",
+                    resource_type: {
                         id: 1,
-                        title: "Test 1",
-                        description: "test",
-                        resource_type: {
-                            id: 1,
-                            type: "PDF",
-                        },
+                        type: "PDF",
                     },
-                    {
-                        id: 2,
-                        title: "Test 2",
-                        description: "test",
-                        resource_type: {
-                            id: 1,
-                            type: "PDF",
-                        },
-                    },
-                    {
-                        id: 3,
-                        title: "Test 3",
-                        description: "test",
-                        resource_type: {
-                            id: 1,
-                            type: "PDF",
-                        },
-                    },
-                ],
-                meta: {
-                    total: 1,
                 },
             },
         });
@@ -77,10 +106,19 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
+const stubs = [
+    "ResourcesLoading",
+    "v-select",
+    "vue-awesome-paginate",
+];
+
 it("render the component", () => {
     render(Resources, {
         props: {
             isAdminPage: true,
+        },
+        global: {
+            stubs,
         },
     });
 
@@ -94,7 +132,11 @@ it("render the component", () => {
 });
 
 it("list resources", async () => {
-    render(Resources);
+    render(Resources, {
+        global: {
+            stubs,
+        },
+    });
     expect(axios.get).toBeCalledWith("/api/resources?page=1&search=&");
     expect(axios.get).toBeCalledWith("/api/resource-types");
     expect(axios.get).toBeCalledTimes(2);
@@ -122,6 +164,9 @@ it("open modal add resource", async () => {
         props: {
             isAdminPage: true,
         },
+        global: {
+            stubs,
+        },
     });
 
     await user.click(screen.getByText("Add"));
@@ -129,31 +174,22 @@ it("open modal add resource", async () => {
 });
 
 it("open modal edit resource", async () => {
-    axios.get.mockResolvedValueOnce({
-        data: {
-            data: [
-                {
-                    id: 1,
-                    title: "Test 1",
-                    description: "test",
-                    resource_type: {
-                        id: 1,
-                        type: "PDF",
-                    },
-                },
-            ],
-        },
-    });
-
     const user = userEvent.setup();
     render(Resources, {
         props: {
             isAdminPage: true,
+            stubs,
         },
     });
 
-    await user.click(await screen.findByText("Edit"));
-    expect(await screen.findByText("Edit Resource"));
+    await waitFor(() => expect(axios.get).toBeCalledTimes(2));
+
+    const buttonEdit = await screen.findAllByText("Edit");
+    
+    await user.click(buttonEdit[0]);
+
+    expect(await screen.findByText(/Test 1/i));
+    expect(await screen.findByText(/Edit Resource/i));
 });
 
 it("handle view resource", async () => {
@@ -214,6 +250,7 @@ it("handle view resource", async () => {
             mocks: {
                 $swal,
             },
+            stubs,
         },
     });
 
@@ -273,6 +310,7 @@ it("show html snippet", async () => {
             mocks: {
                 $swal,
             },
+            stubs,
         },
     });
 
@@ -323,6 +361,7 @@ it("delete resource", async () => {
             mocks: {
                 $swal,
             },
+            stubs,
         },
     });
 

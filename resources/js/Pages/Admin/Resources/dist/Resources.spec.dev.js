@@ -14,9 +14,23 @@ var _axios = _interopRequireDefault(require("axios"));
 
 var _vue2 = _interopRequireDefault(require("vue"));
 
+var _vueSelect = require("vue-select");
+
+var _ResourcesLoading = _interopRequireDefault(require("../../../Components/ResourcesLoading.vue"));
+
+var _ResourcesEditModal = _interopRequireDefault(require("../../../Components/ResourcesEditModal.vue"));
+
+var _vueAwesomePaginate = _interopRequireDefault(require("vue-awesome-paginate"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 _vitest.vi.resetModules();
+
+var originalWarn = window.console.warn;
+
+window.console.warn = function (e) {
+  return e.includes("If this is a native custom element") ? "" : originalWarn(e);
+};
 
 _vitest.vi.spyOn(_axios["default"], "get").mockImplementation(function (argument) {
   return new Promise(function (resolve) {
@@ -34,9 +48,44 @@ _vitest.vi.spyOn(_axios["default"], "get").mockImplementation(function (argument
       });
     }
 
+    if (argument.includes("/api/resources")) {
+      resolve({
+        data: {
+          data: [{
+            id: 1,
+            title: "Test 1",
+            description: "test",
+            resource_type: {
+              id: 1,
+              type: "PDF"
+            }
+          }, {
+            id: 2,
+            title: "Test 2",
+            description: "test",
+            resource_type: {
+              id: 1,
+              type: "PDF"
+            }
+          }, {
+            id: 3,
+            title: "Test 3",
+            description: "test",
+            resource_type: {
+              id: 1,
+              type: "PDF"
+            }
+          }],
+          meta: {
+            total: 1
+          }
+        }
+      });
+    }
+
     return resolve({
       data: {
-        data: [{
+        data: {
           id: 1,
           title: "Test 1",
           description: "test",
@@ -44,25 +93,6 @@ _vitest.vi.spyOn(_axios["default"], "get").mockImplementation(function (argument
             id: 1,
             type: "PDF"
           }
-        }, {
-          id: 2,
-          title: "Test 2",
-          description: "test",
-          resource_type: {
-            id: 1,
-            type: "PDF"
-          }
-        }, {
-          id: 3,
-          title: "Test 3",
-          description: "test",
-          resource_type: {
-            id: 1,
-            type: "PDF"
-          }
-        }],
-        meta: {
-          total: 1
         }
       }
     });
@@ -74,10 +104,14 @@ _vitest.vi.spyOn(_axios["default"], "delete").mockResolvedValue(true);
 afterEach(function () {
   _vitest.vi.clearAllMocks();
 });
+var stubs = ["ResourcesLoading", "v-select", "vue-awesome-paginate"];
 it("render the component", function () {
   (0, _vue.render)(_Resources["default"], {
     props: {
       isAdminPage: true
+    },
+    global: {
+      stubs: stubs
     }
   });
   (0, _vitest.expect)(_vue.screen.getByText("Simple Resources Management")).toBeInTheDocument();
@@ -93,7 +127,11 @@ it("list resources", function _callee() {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          (0, _vue.render)(_Resources["default"]);
+          (0, _vue.render)(_Resources["default"], {
+            global: {
+              stubs: stubs
+            }
+          });
           (0, _vitest.expect)(_axios["default"].get).toBeCalledWith("/api/resources?page=1&search=&");
           (0, _vitest.expect)(_axios["default"].get).toBeCalledWith("/api/resource-types");
           (0, _vitest.expect)(_axios["default"].get).toBeCalledTimes(2);
@@ -151,6 +189,9 @@ it("open modal add resource", function _callee3() {
           (0, _vue.render)(_Resources["default"], {
             props: {
               isAdminPage: true
+            },
+            global: {
+              stubs: stubs
             }
           });
           _context3.next = 4;
@@ -173,52 +214,49 @@ it("open modal add resource", function _callee3() {
   });
 });
 it("open modal edit resource", function _callee4() {
-  var user;
+  var user, buttonEdit;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
-          _axios["default"].get.mockResolvedValueOnce({
-            data: {
-              data: [{
-                id: 1,
-                title: "Test 1",
-                description: "test",
-                resource_type: {
-                  id: 1,
-                  type: "PDF"
-                }
-              }]
-            }
-          });
-
           user = _userEvent["default"].setup();
           (0, _vue.render)(_Resources["default"], {
             props: {
-              isAdminPage: true
+              isAdminPage: true,
+              stubs: stubs
             }
           });
-          _context4.t0 = regeneratorRuntime;
-          _context4.t1 = user;
-          _context4.next = 7;
-          return regeneratorRuntime.awrap(_vue.screen.findByText("Edit"));
+          _context4.next = 4;
+          return regeneratorRuntime.awrap((0, _vue.waitFor)(function () {
+            return (0, _vitest.expect)(_axios["default"].get).toBeCalledTimes(2);
+          }));
 
-        case 7:
-          _context4.t2 = _context4.sent;
-          _context4.t3 = _context4.t1.click.call(_context4.t1, _context4.t2);
-          _context4.next = 11;
-          return _context4.t0.awrap.call(_context4.t0, _context4.t3);
+        case 4:
+          _context4.next = 6;
+          return regeneratorRuntime.awrap(_vue.screen.findAllByText("Edit"));
 
-        case 11:
-          _context4.t4 = _vitest.expect;
-          _context4.next = 14;
-          return regeneratorRuntime.awrap(_vue.screen.findByText("Edit Resource"));
+        case 6:
+          buttonEdit = _context4.sent;
+          _context4.next = 9;
+          return regeneratorRuntime.awrap(user.click(buttonEdit[0]));
 
-        case 14:
-          _context4.t5 = _context4.sent;
-          (0, _context4.t4)(_context4.t5);
+        case 9:
+          _context4.t0 = _vitest.expect;
+          _context4.next = 12;
+          return regeneratorRuntime.awrap(_vue.screen.findByText(/Test 1/i));
 
-        case 16:
+        case 12:
+          _context4.t1 = _context4.sent;
+          (0, _context4.t0)(_context4.t1);
+          _context4.t2 = _vitest.expect;
+          _context4.next = 17;
+          return regeneratorRuntime.awrap(_vue.screen.findByText(/Edit Resource/i));
+
+        case 17:
+          _context4.t3 = _context4.sent;
+          (0, _context4.t2)(_context4.t3);
+
+        case 19:
         case "end":
           return _context4.stop();
       }
@@ -282,7 +320,8 @@ it("handle view resource", function _callee5() {
             global: {
               mocks: {
                 $swal: $swal
-              }
+              },
+              stubs: stubs
             }
           });
           global.open = _vitest.vi.fn();
@@ -358,7 +397,8 @@ it("show html snippet", function _callee6() {
             global: {
               mocks: {
                 $swal: $swal
-              }
+              },
+              stubs: stubs
             }
           });
           _context6.t0 = regeneratorRuntime;
@@ -440,7 +480,8 @@ it("delete resource", function _callee7() {
             global: {
               mocks: {
                 $swal: $swal
-              }
+              },
+              stubs: stubs
             }
           }), rerender = _render.rerender;
           _context7.t0 = regeneratorRuntime;

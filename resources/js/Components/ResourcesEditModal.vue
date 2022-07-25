@@ -42,6 +42,7 @@
                                                     errors.resource_type_id,
                                             }"
                                             data-testid="select-type"
+                                            v-if="resource.resource_type"
                                         >
                                             <option
                                                 placeholder
@@ -232,7 +233,7 @@ export default {
         submit() {
             this.errors = {};
 
-            return this.resource.id
+            return this.resource && this.resource.id
                 ? this.updateResource()
                 : this.storeResource();
         },

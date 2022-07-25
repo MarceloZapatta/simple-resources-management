@@ -264,12 +264,16 @@ export default {
                 : null;
         },
         handleViewResource(resource) {
+            if (!(resource && resource.resource_type && resource.resource_type.id)) {
+                return;
+            }
+
             switch (resource.resource_type.id) {
                 case ResourceTypes.PDF:
                     window.open(resource.file, "_blank");
                     break;
                 case ResourceTypes.HTMLSnippet:
-                    this.$swal({
+                    this.$swal && this.$swal({
                         html:
                             "<code>" +
                             htmlEncode(resource.html_snippet) +
