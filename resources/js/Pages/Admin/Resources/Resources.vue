@@ -318,8 +318,6 @@ export default {
                         resource.open_new_tab ? "_blank" : "_self"
                     );
                     break;
-                default:
-                    break;
             }
         },
     },
