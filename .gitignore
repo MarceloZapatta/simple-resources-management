@@ -15,3 +15,5 @@ yarn-error.log
 /.idea
 /.vscode
 /coverage
+/resources/js/coverage
+/resources/js/node_modules

@@ -209,7 +209,9 @@ export default {
         return {
             isLoading: false,
             resource: {
-                resource_type: {},
+                resource_type: {
+                    id: null
+                },
             },
             file: null,
             errors: {},
@@ -224,6 +226,7 @@ export default {
 
             ResourcesService.find(this.resourceId)
                 .then((response) => (this.resource = response.data.data))
+                .catch(this.showError)
                 .finally(() => (this.isLoading = false));
         },
         submit() {

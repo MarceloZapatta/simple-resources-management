@@ -1,4 +1,11 @@
-const { render, screen, waitFor, fireEvent } = require("@testing-library/vue");
+import {
+    render,
+    screen,
+    waitFor,
+    fireEvent,
+    findAllByText,
+} from "@testing-library/vue";
+import userEvent from "@testing-library/user-event";
 import { expect, vi } from "vitest";
 import Resources from "./Resources.vue";
 import "@testing-library/jest-dom";
@@ -33,22 +40,25 @@ vi.spyOn(axios, "get").mockImplementation((argument) => {
                         title: "Test 1",
                         description: "test",
                         resource_type: {
+                            id: 1,
                             type: "PDF",
                         },
                     },
                     {
-                        id: 1,
+                        id: 2,
                         title: "Test 2",
                         description: "test",
                         resource_type: {
+                            id: 1,
                             type: "PDF",
                         },
                     },
                     {
-                        id: 1,
+                        id: 3,
                         title: "Test 3",
                         description: "test",
                         resource_type: {
+                            id: 1,
                             type: "PDF",
                         },
                     },
@@ -60,6 +70,8 @@ vi.spyOn(axios, "get").mockImplementation((argument) => {
         });
     });
 });
+
+vi.spyOn(axios, "delete").mockResolvedValue(true);
 
 afterEach(() => {
     vi.clearAllMocks();
@@ -102,4 +114,232 @@ it("search resources", async () => {
     );
 
     await waitFor(() => expect(screen.getAllByText("PDF")).toBeTruthy());
+});
+
+it("open modal add resource", async () => {
+    const user = userEvent.setup();
+    render(Resources, {
+        props: {
+            isAdminPage: true,
+        },
+    });
+
+    await user.click(screen.getByText("Add"));
+    expect(await screen.findByText("Add Resource"));
+});
+
+it("open modal edit resource", async () => {
+    axios.get.mockResolvedValueOnce({
+        data: {
+            data: [
+                {
+                    id: 1,
+                    title: "Test 1",
+                    description: "test",
+                    resource_type: {
+                        id: 1,
+                        type: "PDF",
+                    },
+                },
+            ],
+        },
+    });
+
+    const user = userEvent.setup();
+    render(Resources, {
+        props: {
+            isAdminPage: true,
+        },
+    });
+
+    await user.click(await screen.findByText("Edit"));
+    expect(await screen.findByText("Edit Resource"));
+});
+
+it("handle view resource", async () => {
+    const user = userEvent.setup();
+    axios.get.mockResolvedValueOnce({
+        data: {
+            data: [
+                {
+                    id: 1,
+                    title: "Test 1",
+                    file: "https://localhost/pdf.pdf",
+                    resource_type: {
+                        id: 1,
+                        type: "PDF",
+                    },
+                },
+                {
+                    id: 2,
+                    title: "Test 2",
+                    description: "Lorem ipsum dors met",
+                    html_snippet: "<b></b>",
+                    resource_type: {
+                        id: 2,
+                        type: "HTML snippet",
+                    },
+                },
+                {
+                    id: 3,
+                    title: "Test 3",
+                    link: "https://remotecompany.com",
+                    open_new_tab: true,
+                    resource_type: {
+                        id: 3,
+                        type: "Link",
+                    },
+                },
+                {
+                    id: 4,
+                    title: "Test 4",
+                    link: "https://remotecompany.com",
+                    open_new_tab: false,
+                    resource_type: {
+                        id: 3,
+                        type: "Link",
+                    },
+                },
+            ],
+        },
+    });
+
+    const $swal = vi.fn();
+
+    render(Resources, {
+        props: {
+            isAdminPage: false,
+        },
+        global: {
+            mocks: {
+                $swal,
+            },
+        },
+    });
+
+    global.open = vi.fn();
+
+    const viewButtons = await screen.findAllByText("View");
+
+    expect(viewButtons).toHaveLength(4);
+
+    const pdfButton = viewButtons[0];
+    await user.click(pdfButton);
+    expect(global.open).toBeCalledWith("https://localhost/pdf.pdf", "_blank");
+
+    const htmlButton = viewButtons[1];
+    await user.click(htmlButton);
+    expect($swal).toBeCalled();
+
+    const linkButton = viewButtons[2];
+    await user.click(linkButton);
+    expect(global.open).toBeCalledWith("https://remotecompany.com", "_blank");
+
+    const linkButton2 = viewButtons[3];
+    await user.click(linkButton2);
+    expect(global.open).toBeCalledWith("https://remotecompany.com", "_self");
+});
+
+it("show html snippet", async () => {
+    const user = userEvent.setup();
+    axios.get.mockResolvedValueOnce({
+        data: {
+            data: [
+                {
+                    id: 2,
+                    title: "Test 2",
+                    description: "Lorem ipsum dors met",
+                    html_snippet: "<b></b>",
+                    resource_type: {
+                        id: 2,
+                        type: "HTML snippet",
+                    },
+                },
+            ],
+        },
+    });
+
+    const $swal = vi.fn().mockResolvedValueOnce({
+        isConfirmed: false,
+    });
+
+    document.execCommand = vi.fn();
+
+    render(Resources, {
+        props: {
+            isAdminPage: false,
+        },
+        global: {
+            mocks: {
+                $swal,
+            },
+        },
+    });
+
+    await user.click(await screen.findByText("View"));
+
+    expect($swal).toBeCalled();
+    await waitFor(() => expect(document.execCommand).toBeCalledWith("copy"));
+    expect($swal).toBeCalledWith("Copied succesfully!");
+
+    $swal.mockResolvedValueOnce({
+        isConfirmed: true,
+    });
+
+    await user.click(await screen.findByText("View"));
+    expect($swal).toBeCalledTimes(3);
+});
+
+it("delete resource", async () => {
+    const user = userEvent.setup();
+    axios.get.mockResolvedValue({
+        data: {
+            data: [
+                {
+                    id: 2,
+                    title: "Test 2",
+                    description: "Lorem ipsum dors met",
+                    html_snippet: "<b></b>",
+                    resource_type: {
+                        id: 2,
+                        type: "HTML snippet",
+                    },
+                },
+            ],
+        },
+    });
+
+    const $swal = vi.fn().mockResolvedValueOnce({
+        isConfirmed: true,
+    });
+
+    document.execCommand = vi.fn();
+
+    const { rerender } = render(Resources, {
+        props: {
+            isAdminPage: true,
+        },
+        global: {
+            mocks: {
+                $swal,
+            },
+        },
+    });
+
+    await user.click(await screen.findByText("Delete"));
+
+    expect($swal).toBeCalled();
+
+    $swal.mockResolvedValueOnce({ isConfirmed: false });
+
+    await user.click(await screen.findByText("Delete"));
+
+    await waitFor(() => {
+        expect(axios.delete).toBeCalledTimes(1);
+    });
+
+    expect(axios.delete).toBeCalledWith("/api/resources/2");
+
+    expect($swal).toBeCalledWith("Success!", "Resource removed with success.");
+    expect($swal).toBeCalledTimes(3);
 });
