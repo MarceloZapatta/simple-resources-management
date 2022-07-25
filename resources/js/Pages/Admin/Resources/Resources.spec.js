@@ -184,9 +184,9 @@ it("open modal edit resource", async () => {
 
     await waitFor(() => expect(axios.get).toBeCalledTimes(2));
 
-    const buttonEdit = await screen.findAllByText("Edit");
+    const buttonEdit = await screen.findByTestId("button-edit-1");
     
-    await user.click(buttonEdit[0]);
+    user.click(buttonEdit);
 
     expect(await screen.findByText(/Test 1/i));
     expect(await screen.findByText(/Edit Resource/i));

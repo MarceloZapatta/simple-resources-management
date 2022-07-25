@@ -233,30 +233,27 @@ it("open modal edit resource", function _callee4() {
 
         case 4:
           _context4.next = 6;
-          return regeneratorRuntime.awrap(_vue.screen.findAllByText("Edit"));
+          return regeneratorRuntime.awrap(_vue.screen.findByTestId("button-edit-1"));
 
         case 6:
           buttonEdit = _context4.sent;
-          _context4.next = 9;
-          return regeneratorRuntime.awrap(user.click(buttonEdit[0]));
-
-        case 9:
+          user.click(buttonEdit);
           _context4.t0 = _vitest.expect;
-          _context4.next = 12;
+          _context4.next = 11;
           return regeneratorRuntime.awrap(_vue.screen.findByText(/Test 1/i));
 
-        case 12:
+        case 11:
           _context4.t1 = _context4.sent;
           (0, _context4.t0)(_context4.t1);
           _context4.t2 = _vitest.expect;
-          _context4.next = 17;
+          _context4.next = 16;
           return regeneratorRuntime.awrap(_vue.screen.findByText(/Edit Resource/i));
 
-        case 17:
+        case 16:
           _context4.t3 = _context4.sent;
           (0, _context4.t2)(_context4.t3);
 
-        case 19:
+        case 18:
         case "end":
           return _context4.stop();
       }

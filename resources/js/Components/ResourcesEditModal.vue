@@ -303,18 +303,21 @@ export default {
         isHTMLSnippet() {
             return (
                 this.resource &&
+                this.resource.resource_type &&
                 this.resource.resource_type.id === ResourceTypes.HTMLSnippet
             );
         },
         isPDF() {
             return (
                 this.resource &&
+                this.resource.resource_type &&
                 this.resource.resource_type.id === ResourceTypes.PDF
             );
         },
         isLink() {
             return (
                 this.resource &&
+                this.resource.resource_type &&
                 this.resource.resource_type.id === ResourceTypes.Link
             );
         },

@@ -107,6 +107,7 @@
                                 <button
                                     @click.prevent="editResource(resource)"
                                     class="button button-secondary"
+                                    :data-testid="`button-edit-${resource.id}`"
                                 >
                                     Edit
                                 </button>
@@ -264,7 +265,17 @@ export default {
                 : null;
         },
         handleViewResource(resource) {
-            if (!(resource && resource.resource_type && resource.resource_type.id)) {
+            if (
+                !(
+                    resource &&
+                    resource.resource_type &&
+                    resource.resource_type.id
+                )
+            ) {
+                return;
+            }
+
+            if (!this.$swal) {
                 return;
             }
 
@@ -273,7 +284,7 @@ export default {
                     window.open(resource.file, "_blank");
                     break;
                 case ResourceTypes.HTMLSnippet:
-                    this.$swal && this.$swal({
+                    this.$swal({
                         html:
                             "<code>" +
                             htmlEncode(resource.html_snippet) +
@@ -283,7 +294,7 @@ export default {
                     }).then((result) => {
                         if (!result.isConfirmed) {
                             var textArea = document.createElement("textarea");
-                            textArea.id = "temp-copy"
+                            textArea.id = "temp-copy";
                             textArea.value = resource.html_snippet;
 
                             textArea.style.top = "0";
@@ -294,10 +305,10 @@ export default {
                             document.body.appendChild(textArea);
                             textArea.focus();
                             textArea.select();
-                            document.execCommand('copy');
-                            textArea.remove()
+                            document.execCommand("copy");
+                            textArea.remove();
 
-                            this.$swal("Copied succesfully!")
+                            this.$swal("Copied succesfully!");
                         }
                     });
                     break;
